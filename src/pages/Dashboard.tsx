@@ -1,0 +1,261 @@
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Progress } from "@/components/ui/progress";
+import { 
+  Flame, 
+  Trophy, 
+  Zap, 
+  Target, 
+  Calendar, 
+  TrendingUp, 
+  Play, 
+  Clock,
+  Star,
+  Award
+} from "lucide-react";
+
+const Dashboard = () => {
+  return (
+    <div className="min-h-screen bg-background">
+      {/* Header */}
+      <header className="sticky top-0 z-50 w-full border-b border-border bg-background/95 backdrop-blur">
+        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-8 bg-gradient-primary rounded-lg flex items-center justify-center">
+              <Zap className="w-5 h-5 text-primary-foreground" />
+            </div>
+            <h1 className="text-lg font-heading font-bold text-foreground">
+              Confidence<span className="text-gradient-primary">Speak</span>
+            </h1>
+          </div>
+          <div className="flex items-center gap-4">
+            <div className="xp-badge">
+              <Star className="w-4 h-4" />
+              1,247 XP
+            </div>
+            <Button variant="ghost" size="sm">Perfil</Button>
+          </div>
+        </div>
+      </header>
+
+      <main className="container mx-auto px-4 py-8 max-w-6xl">
+        {/* Welcome Section */}
+        <div className="mb-8">
+          <h2 className="text-2xl font-heading font-bold text-foreground mb-2">
+            Bom dia, Marina! 👋
+          </h2>
+          <p className="text-muted-foreground">
+            Você está no nível <span className="text-success font-medium">Intermediário</span>. 
+            Continue praticando para alcançar o nível Avançado.
+          </p>
+        </div>
+
+        {/* Stats Cards */}
+        <div className="grid md:grid-cols-4 gap-6 mb-8">
+          <Card className="card-elevated">
+            <CardContent className="p-6">
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 rounded-xl bg-gradient-success flex items-center justify-center">
+                  <Flame className="w-6 h-6 text-success-foreground" />
+                </div>
+                <div>
+                  <p className="text-2xl font-bold text-foreground">12</p>
+                  <p className="text-sm text-muted-foreground">Dias de Streak</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="card-elevated">
+            <CardContent className="p-6">
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 rounded-xl bg-gradient-primary flex items-center justify-center">
+                  <Target className="w-6 h-6 text-primary-foreground" />
+                </div>
+                <div>
+                  <p className="text-2xl font-bold text-foreground">87%</p>
+                  <p className="text-sm text-muted-foreground">Precisão Média</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="card-elevated">
+            <CardContent className="p-6">
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 rounded-xl bg-gradient-card flex items-center justify-center text-warning">
+                  <Clock className="w-6 h-6" />
+                </div>
+                <div>
+                  <p className="text-2xl font-bold text-foreground">3h 24m</p>
+                  <p className="text-sm text-muted-foreground">Tempo Total</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="card-elevated">
+            <CardContent className="p-6">
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 rounded-xl bg-gradient-card flex items-center justify-center text-success">
+                  <Trophy className="w-6 h-6" />
+                </div>
+                <div>
+                  <p className="text-2xl font-bold text-foreground">8</p>
+                  <p className="text-sm text-muted-foreground">Conquistas</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        <div className="grid lg:grid-cols-3 gap-8">
+          {/* Main Practice Area */}
+          <div className="lg:col-span-2 space-y-6">
+            {/* Quick Practice */}
+            <Card className="card-elevated">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Play className="w-5 h-5 text-primary" />
+                  Prática Rápida
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="grid md:grid-cols-2 gap-4">
+                  <Button className="btn-hero h-auto p-4 flex-col" asChild>
+                    <a href="/exercise">
+                      <Clock className="w-6 h-6 mb-2" />
+                      <span className="text-base font-medium">Exercício 5min</span>
+                      <span className="text-xs opacity-80">Meeting Skills</span>
+                    </a>
+                  </Button>
+                  <Button variant="outline" className="h-auto p-4 flex-col border-2" asChild>
+                    <a href="/exercise">
+                      <Target className="w-6 h-6 mb-2" />
+                      <span className="text-base font-medium">Exercício 10min</span>
+                      <span className="text-xs opacity-60">Presentation Skills</span>
+                    </a>
+                  </Button>
+                </div>
+                <div className="p-4 bg-accent rounded-lg">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-sm font-medium">Meta Diária</span>
+                    <span className="text-sm text-muted-foreground">1/2 exercícios</span>
+                  </div>
+                  <Progress value={50} className="h-2" />
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Recent Progress */}
+            <Card className="card-elevated">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <TrendingUp className="w-5 h-5 text-success" />
+                  Progresso Recente
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {[
+                    { title: "Team Meeting Discussion", score: 92, time: "2h atrás" },
+                    { title: "Client Presentation", score: 88, time: "1 dia atrás" },
+                    { title: "Negotiation Tactics", score: 95, time: "2 dias atrás" }
+                  ].map((item, index) => (
+                    <div key={index} className="flex items-center justify-between p-3 bg-background-muted rounded-lg">
+                      <div>
+                        <p className="font-medium text-foreground">{item.title}</p>
+                        <p className="text-sm text-muted-foreground">{item.time}</p>
+                      </div>
+                      <div className="text-right">
+                        <div className="text-lg font-bold text-success">{item.score}%</div>
+                        <div className="text-xs text-muted-foreground">Precisão</div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Sidebar */}
+          <div className="space-y-6">
+            {/* Level Progress */}
+            <Card className="card-elevated">
+              <CardHeader>
+                <CardTitle className="text-lg">Nível Intermediário</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  <div>
+                    <div className="flex justify-between text-sm mb-2">
+                      <span>Progresso para Avançado</span>
+                      <span>1,247 / 1,500 XP</span>
+                    </div>
+                    <Progress value={83} className="h-3" />
+                  </div>
+                  <p className="text-sm text-muted-foreground">
+                    Você precisa de mais <span className="font-medium text-foreground">253 XP</span> para o próximo nível!
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Recent Achievements */}
+            <Card className="card-elevated">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Award className="w-5 h-5 text-warning" />
+                  Conquistas Recentes
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3">
+                  <div className="achievement-badge">
+                    <Trophy className="w-6 h-6 text-success" />
+                    <div>
+                      <p className="font-medium text-sm">Primeira Semana</p>
+                      <p className="text-xs text-muted-foreground">7 dias consecutivos</p>
+                    </div>
+                  </div>
+                  <div className="achievement-badge locked">
+                    <Flame className="w-6 h-6" />
+                    <div>
+                      <p className="font-medium text-sm">Maratonista</p>
+                      <p className="text-xs text-muted-foreground">15 min de prática</p>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Today's Goal */}
+            <Card className="card-elevated">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Calendar className="w-5 h-5 text-primary" />
+                  Meta de Hoje
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-center py-4">
+                  <div className="w-16 h-16 bg-gradient-success rounded-full flex items-center justify-center mx-auto mb-3">
+                    <Target className="w-8 h-8 text-success-foreground" />
+                  </div>
+                  <p className="text-sm text-muted-foreground mb-3">
+                    Complete mais 1 exercício para manter seu streak!
+                  </p>
+                  <Button className="btn-success w-full" asChild>
+                    <a href="/exercise">Começar Exercício</a>
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      </main>
+    </div>
+  );
+};
+
+export default Dashboard;
