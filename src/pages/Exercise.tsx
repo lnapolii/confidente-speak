@@ -1,7 +1,8 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
+import { useToast } from "@/hooks/use-toast";
 import { 
   Play, 
   Pause, 
@@ -17,10 +18,230 @@ import {
   Clock
 } from "lucide-react";
 
+// Translation system
+const WordTooltip = ({ word, isVisible, position }: { word: string; isVisible: boolean; position: { x: number; y: number } }) => {
+  const translations: Record<string, string[]> = {
+    quarterly: ["trimestral", "a cada três meses"],
+    performance: ["desempenho", "performance"],
+    exceeded: ["excedeu", "superou"],
+    satisfaction: ["satisfação"],
+    challenges: ["desafios", "dificuldades"],
+    adoption: ["adoção", "implementação"],
+    meeting: ["reunião", "encontro"],
+    revenue: ["receita", "faturamento"]
+  };
+
+  const wordTranslations = translations[word.toLowerCase().replace(/[.,!?]/g, '')] || ["tradução não encontrada"];
+
+  if (!isVisible) return null;
+
+  return (
+    <div 
+      className="fixed z-50 bg-gray-900 text-white px-3 py-2 rounded-lg shadow-lg text-sm pointer-events-none"
+      style={{ 
+        left: position.x + 10, 
+        top: position.y - 40,
+        transform: position.y < 50 ? 'translateY(40px)' : 'none'
+      }}
+    >
+      <div className="font-semibold mb-1">Traduções:</div>
+      <ul className="list-disc list-inside">
+        {wordTranslations.map((translation, i) => (
+          <li key={i}>{translation}</li>
+        ))}
+      </ul>
+    </div>
+  );
+};
+
+const InteractiveText = ({ text, onWordClick }: { text: string; onWordClick: (word: string) => void }) => {
+  const [tooltip, setTooltip] = useState<{ word: string; position: { x: number; y: number } } | null>(null);
+  const [clickedWords, setClickedWords] = useState<Set<string>>(new Set());
+
+  const handleWordHover = (word: string, event: React.MouseEvent) => {
+    const rect = (event.target as HTMLElement).getBoundingClientRect();
+    setTooltip({
+      word: word.toLowerCase().replace(/[.,!?]/g, ''),
+      position: { x: rect.left, y: rect.top }
+    });
+  };
+
+  const handleWordClick = (word: string) => {
+    const cleanWord = word.toLowerCase().replace(/[.,!?]/g, '');
+    setClickedWords(prev => new Set([...prev, cleanWord]));
+    onWordClick(cleanWord);
+  };
+
+  const words = text.split(' ');
+
+  return (
+    <div className="relative">
+      <p className="mb-4 leading-relaxed">
+        {words.map((word, index) => {
+          const cleanWord = word.toLowerCase().replace(/[.,!?]/g, '');
+          const isClicked = clickedWords.has(cleanWord);
+          
+          return (
+            <span 
+              key={index}
+              className={`cursor-pointer hover:bg-blue-100 transition-colors px-1 rounded ${
+                isClicked ? 'text-blue-600 bg-blue-50' : ''
+              }`}
+              onMouseEnter={(e) => handleWordHover(word, e)}
+              onMouseLeave={() => setTooltip(null)}
+              onClick={() => handleWordClick(word)}
+            >
+              {word}{index < words.length - 1 ? ' ' : ''}
+            </span>
+          );
+        })}
+      </p>
+      
+      <WordTooltip 
+        word={tooltip?.word || ''} 
+        isVisible={!!tooltip} 
+        position={tooltip?.position || { x: 0, y: 0 }} 
+      />
+    </div>
+  );
+};
+
 const Exercise = () => {
   const [currentStep, setCurrentStep] = useState(1);
   const [isRecording, setIsRecording] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
+  const [wordsConsulted, setWordsConsulted] = useState(0);
+  const [audioUrl, setAudioUrl] = useState<string | null>(null);
+  const [recordedAudioUrl, setRecordedAudioUrl] = useState<string | null>(null);
+  const [playbackSpeed, setPlaybackSpeed] = useState(1.0);
+  const [currentWordIndex, setCurrentWordIndex] = useState(0);
+  
+  const audioRef = useRef<HTMLAudioElement>(null);
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const chunksRef = useRef<Blob[]>([]);
+  const { toast } = useToast();
+
+  const exerciseText = `Good morning everyone, and thank you for joining today's quarterly review meeting. I'd like to start by discussing our performance metrics from Q3. Our team has exceeded expectations in several key areas. Sales revenue increased by 23%, while customer satisfaction scores reached an all-time high of 4.8 out of 5. However, we still have some challenges to address, particularly in our international markets where we're seeing slower adoption rates.`;
+
+  // TTS functionality
+  const generateSpeech = async (text: string) => {
+    return new Promise<void>((resolve) => {
+      const utterance = new SpeechSynthesisUtterance(text);
+      const voices = speechSynthesis.getVoices();
+      const americanVoice = voices.find(voice => 
+        voice.lang === 'en-US' && (voice.name.includes('Google') || voice.name.includes('Microsoft'))
+      ) || voices.find(voice => voice.lang === 'en-US') || voices[0];
+      
+      utterance.voice = americanVoice;
+      utterance.rate = playbackSpeed;
+      utterance.pitch = 1.0;
+      utterance.lang = 'en-US';
+      
+      utterance.onstart = () => setIsPlaying(true);
+      utterance.onend = () => {
+        setIsPlaying(false);
+        resolve();
+      };
+      
+      speechSynthesis.speak(utterance);
+    });
+  };
+
+  // Audio recording functionality
+  const startRecording = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ 
+        audio: {
+          echoCancellation: true,
+          noiseSuppression: true,
+          sampleRate: 44100
+        } 
+      });
+      
+      chunksRef.current = [];
+      mediaRecorderRef.current = new MediaRecorder(stream, {
+        mimeType: 'audio/webm;codecs=opus'
+      });
+      
+      mediaRecorderRef.current.ondataavailable = (event) => {
+        if (event.data.size > 0) {
+          chunksRef.current.push(event.data);
+        }
+      };
+      
+      mediaRecorderRef.current.onstop = () => {
+        const blob = new Blob(chunksRef.current, { type: 'audio/webm' });
+        const url = URL.createObjectURL(blob);
+        setRecordedAudioUrl(url);
+        
+        stream.getTracks().forEach(track => track.stop());
+        
+        toast({
+          title: "Gravação concluída!",
+          description: "Sua pronúncia foi gravada com sucesso.",
+        });
+      };
+      
+      mediaRecorderRef.current.start();
+      setIsRecording(true);
+      
+    } catch (error) {
+      console.error('Erro ao acessar microfone:', error);
+      toast({
+        title: "Erro no microfone",
+        description: "Por favor, permita o acesso ao microfone para continuar.",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const stopRecording = () => {
+    if (mediaRecorderRef.current && isRecording) {
+      mediaRecorderRef.current.stop();
+      setIsRecording(false);
+    }
+  };
+
+  // Text highlighting during audio
+  useEffect(() => {
+    if (!isPlaying) return;
+    
+    const words = exerciseText.split(' ');
+    let wordIndex = 0;
+    
+    const interval = setInterval(() => {
+      setCurrentWordIndex(wordIndex);
+      wordIndex++;
+      
+      if (wordIndex >= words.length) {
+        clearInterval(interval);
+        setCurrentWordIndex(0);
+      }
+    }, 500); // Approximate timing
+    
+    return () => clearInterval(interval);
+  }, [isPlaying]);
+
+  const handleWordClick = (word: string) => {
+    setWordsConsulted(prev => prev + 1);
+  };
+
+  const handlePlayPause = () => {
+    if (isPlaying) {
+      speechSynthesis.cancel();
+      setIsPlaying(false);
+    } else {
+      generateSpeech(exerciseText);
+    }
+  };
+
+  const handleSpeedChange = (speed: number) => {
+    setPlaybackSpeed(speed);
+    if (isPlaying) {
+      speechSynthesis.cancel();
+      setTimeout(() => generateSpeech(exerciseText), 100);
+    }
+  };
 
   const steps = [
     { id: 1, title: "Leitura", icon: BookOpen, status: "current" },
@@ -102,35 +323,18 @@ const Exercise = () => {
               </CardHeader>
               <CardContent className="space-y-6">
                 <div className="reading-text p-6 bg-background-muted rounded-xl">
-                  <p className="mb-4">
-                    Good morning everyone, and thank you for joining today's{" "}
-                    <span className="word-tooltip">quarterly</span> review meeting. 
-                    I'd like to start by discussing our{" "}
-                    <span className="word-tooltip">performance</span> metrics from Q3.
-                  </p>
-                  <p className="mb-4">
-                    Our team has{" "}
-                    <span className="word-tooltip">exceeded</span> expectations in several key areas. 
-                    Sales revenue increased by 23%, while customer{" "}
-                    <span className="word-tooltip">satisfaction</span> scores reached an all-time high of 4.8 out of 5.
-                  </p>
-                  <p>
-                    However, we still have some{" "}
-                    <span className="word-tooltip">challenges</span> to address, 
-                    particularly in our international markets where we're seeing slower{" "}
-                    <span className="word-tooltip">adoption</span> rates.
-                  </p>
+                  <InteractiveText text={exerciseText} onWordClick={handleWordClick} />
                 </div>
 
                 <div className="bg-success-muted p-4 rounded-lg">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <Target className="w-5 h-5 text-success" />
-                      <span className="font-medium text-success-dark">Progresso de Compreensão</span>
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <Target className="w-5 h-5 text-success" />
+                        <span className="font-medium text-success-dark">Progresso de Compreensão</span>
+                      </div>
+                      <span className="text-sm text-success-dark">{wordsConsulted}/15 palavras consultadas</span>
                     </div>
-                    <span className="text-sm text-success-dark">5/12 palavras consultadas</span>
-                  </div>
-                  <Progress value={42} className="mt-2 h-2" />
+                    <Progress value={(wordsConsulted / 15) * 100} className="mt-2 h-2" />
                 </div>
 
                 <div className="flex justify-end">
@@ -163,7 +367,7 @@ const Exercise = () => {
                       <Button 
                         size="lg" 
                         className={isPlaying ? "btn-success" : "btn-hero"}
-                        onClick={() => setIsPlaying(!isPlaying)}
+                        onClick={handlePlayPause}
                       >
                         {isPlaying ? <Pause className="w-6 h-6" /> : <Play className="w-6 h-6" />}
                       </Button>
@@ -176,10 +380,29 @@ const Exercise = () => {
                         <RotateCcw className="w-4 h-4 mr-2" />
                         Repetir
                       </Button>
-                      <Button variant="ghost" size="sm">
-                        <Volume2 className="w-4 h-4 mr-2" />
-                        0.8x
-                      </Button>
+                      <div className="flex gap-1">
+                        <Button 
+                          variant={playbackSpeed === 0.75 ? "default" : "ghost"} 
+                          size="sm"
+                          onClick={() => handleSpeedChange(0.75)}
+                        >
+                          0.75x
+                        </Button>
+                        <Button 
+                          variant={playbackSpeed === 1.0 ? "default" : "ghost"} 
+                          size="sm"
+                          onClick={() => handleSpeedChange(1.0)}
+                        >
+                          1.0x
+                        </Button>
+                        <Button 
+                          variant={playbackSpeed === 1.25 ? "default" : "ghost"} 
+                          size="sm"
+                          onClick={() => handleSpeedChange(1.25)}
+                        >
+                          1.25x
+                        </Button>
+                      </div>
                     </div>
                   </div>
 
@@ -202,9 +425,19 @@ const Exercise = () => {
                   </div>
 
                   <div className="text-center p-4 bg-primary/5 rounded-lg">
-                    <p className="text-foreground">
-                      <span className="bg-primary/20 px-1 rounded">Good morning everyone</span>, 
-                      and thank you for joining today's quarterly review meeting...
+                    <p className="text-foreground leading-relaxed">
+                      {exerciseText.split(' ').map((word, index) => (
+                        <span 
+                          key={index}
+                          className={`transition-all px-1 rounded ${
+                            index === currentWordIndex && isPlaying
+                              ? 'bg-primary/30 font-semibold' 
+                              : ''
+                          }`}
+                        >
+                          {word}{' '}
+                        </span>
+                      ))}
                     </p>
                   </div>
                 </div>
@@ -258,7 +491,7 @@ const Exercise = () => {
                   <Button
                     size="lg"
                     className={isRecording ? "btn-success animate-pulse-success" : "btn-hero"}
-                    onClick={() => setIsRecording(!isRecording)}
+                    onClick={isRecording ? stopRecording : startRecording}
                   >
                     {isRecording ? (
                       <>
@@ -274,15 +507,37 @@ const Exercise = () => {
                   </Button>
                 </div>
 
+                {recordedAudioUrl && (
+                  <Card className="border-success bg-success/5">
+                    <CardContent className="p-4">
+                      <div className="space-y-4">
+                        <div className="flex items-center gap-3">
+                          <CheckCircle className="w-5 h-5 text-success" />
+                          <span className="text-sm font-medium">Gravação concluída!</span>
+                        </div>
+                        <audio src={recordedAudioUrl} controls className="w-full" />
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          onClick={() => setRecordedAudioUrl(null)}
+                        >
+                          <RotateCcw className="w-4 h-4 mr-2" />
+                          Gravar Novamente
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+
                 {isRecording && (
                   <Card className="border-success bg-success/5">
                     <CardContent className="p-4">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3">
                           <div className="w-3 h-3 bg-success rounded-full animate-pulse" />
-                          <span className="text-sm font-medium">Análise em tempo real</span>
+                          <span className="text-sm font-medium">Gravando...</span>
                         </div>
-                        <span className="text-sm text-muted-foreground">0:08 gravados</span>
+                        <span className="text-sm text-muted-foreground">Escutando sua voz</span>
                       </div>
                     </CardContent>
                   </Card>
@@ -294,7 +549,15 @@ const Exercise = () => {
                   </Button>
                   <Button 
                     className="btn-success"
-                    disabled={!isRecording}
+                    disabled={!recordedAudioUrl}
+                    onClick={() => {
+                      toast({
+                        title: "Exercício concluído! 🎉",
+                        description: "Parabéns! Você ganhou 50 XP.",
+                      });
+                      // Redirect to dashboard after completion
+                      setTimeout(() => window.location.href = '/dashboard', 2000);
+                    }}
                   >
                     <CheckCircle className="w-4 h-4 mr-2" />
                     Finalizar Exercício
