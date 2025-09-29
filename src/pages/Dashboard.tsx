@@ -33,7 +33,9 @@ const Dashboard = () => {
               <Star className="w-4 h-4" />
               1,247 XP
             </div>
-            <Button variant="ghost" size="sm">Perfil</Button>
+            <Button variant="ghost" size="sm" asChild>
+              <a href="/profile">Perfil</a>
+            </Button>
           </div>
         </div>
       </header>

@@ -3,6 +3,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { useToast } from "@/hooks/use-toast";
+import PronunciationAnalysis from "@/components/PronunciationAnalysis";
+import { useExerciseContent } from "@/components/ExerciseContentGenerator";
 import { 
   Play, 
   Pause, 
@@ -113,15 +115,20 @@ const Exercise = () => {
   const [wordsConsulted, setWordsConsulted] = useState(0);
   const [audioUrl, setAudioUrl] = useState<string | null>(null);
   const [recordedAudioUrl, setRecordedAudioUrl] = useState<string | null>(null);
+  const [recordedAudioBlob, setRecordedAudioBlob] = useState<Blob | null>(null);
   const [playbackSpeed, setPlaybackSpeed] = useState(1.0);
   const [currentWordIndex, setCurrentWordIndex] = useState(0);
+  const [showAnalysis, setShowAnalysis] = useState(false);
+  const [exerciseDuration, setExerciseDuration] = useState<5 | 10 | 15>(10);
+  const [exerciseTopic, setExerciseTopic] = useState("reunioes");
   
   const audioRef = useRef<HTMLAudioElement>(null);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<Blob[]>([]);
   const { toast } = useToast();
 
-  const exerciseText = `Good morning everyone, and thank you for joining today's quarterly review meeting. I'd like to start by discussing our performance metrics from Q3. Our team has exceeded expectations in several key areas. Sales revenue increased by 23%, while customer satisfaction scores reached an all-time high of 4.8 out of 5. However, we still have some challenges to address, particularly in our international markets where we're seeing slower adoption rates.`;
+  const exerciseContent = useExerciseContent(exerciseTopic, exerciseDuration);
+  const exerciseText = exerciseContent.text;
 
   // TTS functionality
   const generateSpeech = async (text: string) => {
@@ -173,6 +180,7 @@ const Exercise = () => {
         const blob = new Blob(chunksRef.current, { type: 'audio/webm' });
         const url = URL.createObjectURL(blob);
         setRecordedAudioUrl(url);
+        setRecordedAudioBlob(blob);
         
         stream.getTracks().forEach(track => track.stop());
         
@@ -551,22 +559,48 @@ const Exercise = () => {
                     className="btn-success"
                     disabled={!recordedAudioUrl}
                     onClick={() => {
-                      toast({
-                        title: "Exercício concluído! 🎉",
-                        description: "Parabéns! Você ganhou 50 XP.",
-                      });
-                      // Redirect to dashboard after completion
-                      setTimeout(() => window.location.href = '/dashboard', 2000);
+                      if (recordedAudioBlob) {
+                        setShowAnalysis(true);
+                      }
                     }}
                   >
                     <CheckCircle className="w-4 h-4 mr-2" />
-                    Finalizar Exercício
+                    Analisar Pronúncia
                   </Button>
                 </div>
               </CardContent>
             </>
           )}
         </Card>
+
+        {/* Pronunciation Analysis Modal */}
+        {showAnalysis && recordedAudioBlob && (
+          <div className="fixed inset-0 bg-black/50 backdrop-blur z-50 flex items-center justify-center p-4">
+            <div className="bg-background rounded-2xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+              <div className="p-8">
+                <PronunciationAnalysis
+                  userAudio={recordedAudioBlob}
+                  referenceText={exerciseText}
+                  onComplete={() => {
+                    setShowAnalysis(false);
+                    toast({
+                      title: "Exercício concluído! 🎉",
+                      description: "Parabéns! Você ganhou XP.",
+                    });
+                    setTimeout(() => window.location.href = '/dashboard', 2000);
+                  }}
+                  onRetry={() => {
+                    setShowAnalysis(false);
+                    setCurrentStep(1);
+                    setRecordedAudioUrl(null);
+                    setRecordedAudioBlob(null);
+                    setWordsConsulted(0);
+                  }}
+                />
+              </div>
+            </div>
+          </div>
+        )}
       </main>
     </div>
   );

@@ -22,38 +22,60 @@ const PricingSection = () => {
     },
     {
       name: "Mensal",
-      price: "R$ 29,90",
+      price: "R$ 79,90",
       period: "por mês",
       description: "Flexibilidade total",
       features: [
-        "Exercícios ilimitados",
-        "Análise avançada de pronúncia",
-        "Todos os cenários corporativos",
-        "Conquistas e badges",
-        "Suporte prioritário",
-        "Novos conteúdos mensais"
+        "✅ Acesso completo à plataforma",
+        "✅ Exercícios ilimitados (5, 10 e 15 min)",
+        "✅ Análise de pronúncia por IA",
+        "✅ Biblioteca de vocabulário",
+        "✅ Sistema de gamificação",
+        "✅ Suporte prioritário"
       ],
       cta: "Assinar Mensal",
       popular: false,
       icon: <Star className="w-5 h-5" />
     },
     {
-      name: "Anual",
-      price: "R$ 19,90",
+      name: "Trimestral",
+      price: "R$ 59,90",
       period: "por mês",
-      originalPrice: "R$ 29,90",
-      savings: "33% de economia",
-      description: "Melhor custo-benefício",
+      originalPrice: "R$ 79,90",
+      savings: "25% de economia",
+      billingInfo: "R$ 179,70 cobrados a cada 3 meses",
+      description: "Economize R$ 60,00",
       features: [
-        "Tudo do plano mensal",
-        "2 meses grátis (R$ 238,80/ano)",
-        "Acesso antecipado a novidades",
-        "Sessões de coaching mensais",
-        "Certificado de conclusão",
-        "Garantia de 30 dias"
+        "✅ Tudo do plano mensal",
+        "💰 25% de desconto",
+        "🎁 R$ 60,00 de economia",
+        "📊 Relatórios mensais de progresso",
+        "🎯 Metas personalizadas",
+        "⚡ Acesso prioritário a novos recursos"
+      ],
+      cta: "Assinar Trimestral",
+      popular: true,
+      icon: <Crown className="w-5 h-5" />
+    },
+    {
+      name: "Anual",
+      price: "R$ 49,90",
+      period: "por mês",
+      originalPrice: "R$ 79,90",
+      savings: "38% de economia",
+      billingInfo: "R$ 598,80 cobrados anualmente",
+      description: "Economize R$ 360,00",
+      features: [
+        "✅ Tudo do plano mensal",
+        "💰 38% de desconto",
+        "🎁 R$ 360,00 de economia",
+        "🏆 Badge exclusivo de membro anual",
+        "📚 Acesso a materiais premium",
+        "🎓 Certificado de conclusão",
+        "👥 Sessões de mentoria em grupo (mensais)"
       ],
       cta: "Assinar Anual",
-      popular: true,
+      popular: false,
       icon: <Crown className="w-5 h-5" />
     }
   ];
@@ -119,6 +141,12 @@ const PricingSection = () => {
                         {plan.savings}
                       </span>
                     </div>
+                  )}
+                  
+                  {plan.billingInfo && (
+                    <p className="text-xs text-muted-foreground mt-2">
+                      {plan.billingInfo}
+                    </p>
                   )}
                 </div>
                 
