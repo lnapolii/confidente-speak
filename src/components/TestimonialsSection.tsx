@@ -4,25 +4,25 @@ import { Star, Quote } from "lucide-react";
 const TestimonialsSection = () => {
   const testimonials = [
     {
-      name: "Marina Santos",
-      role: "Gerente de Projetos, Ambev",
-      content: "Em 3 semanas já sentia muito mais confiança nas calls em inglês. O método realmente funciona!",
+      name: "Maria Silva",
+      role: "Product Manager na Nubank",
+      content: "Em 2 semanas já me sentia confiante para conduzir reuniões em inglês. O feedback da IA é cirúrgico!",
       rating: 5,
       avatar: "MS"
     },
     {
-      name: "Carlos Oliveira", 
-      role: "Desenvolvedor Senior, iFood",
-      content: "Os exercícios de 10 minutos se encaixam perfeitamente na minha rotina. Gamificação é viciante!",
+      name: "João Santos",
+      role: "Tech Lead na VTEX",
+      content: "Finalmente um app que foca no que realmente importa: comunicação prática do dia a dia.",
       rating: 5,
-      avatar: "CO"
+      avatar: "JS"
     },
     {
-      name: "Ana Paula Lima",
-      role: "Diretora Comercial, Stone",
-      content: "Finalmente uma plataforma focada no inglês corporativo brasileiro. Mudou minha carreira.",
+      name: "Ana Costa",
+      role: "Engineering Manager na Mercado Livre",
+      content: "5 minutos por dia mudaram completamente minha performance em calls internacionais.",
       rating: 5,
-      avatar: "AP"
+      avatar: "AC"
     }
   ];
 
@@ -31,11 +31,11 @@ const TestimonialsSection = () => {
       <div className="container mx-auto max-w-6xl">
         <div className="text-center mb-16">
           <h2 className="text-3xl md:text-4xl font-heading font-bold text-foreground mb-4">
-            O Que Dizem Nossos{" "}
-            <span className="text-gradient-success">Usuários</span>
+            Profissionais que Já Transformaram{" "}
+            <span className="text-gradient-success">Sua Comunicação</span>
           </h2>
           <p className="text-lg text-muted-foreground">
-            Profissionais que transformaram sua comunicação em inglês
+            Veja o que dizem quem já está falando com confiança
           </p>
         </div>
 

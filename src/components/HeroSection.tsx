@@ -11,40 +11,45 @@ const HeroSection = () => {
       <div className="container mx-auto max-w-6xl relative">
         <div className="text-center mb-16">
           {/* Badge */}
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-success-muted text-success-dark text-sm font-medium mb-8 animate-bounce-in">
-            <Star className="w-4 h-4" />
-            <span>7 dias grátis • Sem cartão de crédito</span>
+          <div className="inline-flex items-center gap-2 px-5 py-3 rounded-full bg-success-muted text-success-dark text-sm font-bold mb-8 animate-bounce-in shadow-lg border-2 border-success/20">
+            <Star className="w-5 h-5 fill-success text-success" />
+            <span>7 dias grátis • Sem cartão de crédito • Sem compromisso</span>
           </div>
 
           {/* Main heading */}
-          <h1 className="hero-title mb-8 animate-fade-in">
-            Desenvolva{" "}
+          <h1 className="hero-title mb-6 animate-fade-in">
+            Fale Inglês com{" "}
             <span className="text-gradient-primary">Confiança</span>{" "}
-            em Inglês Corporativo
+            em Reuniões Corporativas
           </h1>
 
           {/* Subtitle */}
-          <p className="hero-subtitle mb-12 animate-slide-up">
-            Pratique situações reais do ambiente corporativo com exercícios 
-            gamificados de 5-15 minutos. Análise de IA para sua pronúncia 
-            e progresso personalizado.
+          <p className="hero-subtitle mb-10 animate-slide-up">
+            Apenas 5 minutos por dia. IA analisa sua pronúncia em tempo real.
+            <br />
+            <strong className="text-foreground">Transforme insegurança em confiança profissional.</strong>
           </p>
 
           {/* CTA Buttons */}
-          <div className="flex flex-col sm:flex-row gap-4 justify-center mb-16">
-            <Button className="btn-hero hover-lift" asChild>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center mb-6">
+            <Button size="lg" className="btn-hero hover-lift px-10 py-7 text-xl h-auto font-bold shadow-xl" asChild>
               <a href="/dashboard">
-                <Zap className="w-5 h-5 mr-2" />
-                Começar Agora - Grátis
+                <Zap className="w-6 h-6 mr-2" />
+                🚀 Começar 7 Dias Grátis
               </a>
             </Button>
-            <Button variant="outline" className="px-8 py-4 text-lg border-2 hover:bg-accent" asChild>
+            <Button size="lg" variant="outline" className="px-10 py-7 text-xl h-auto border-2 hover:bg-accent font-semibold" asChild>
               <a href="/exercise">
-                <Play className="w-5 h-5 mr-2" />
-                Ver Como Funciona
+                <Play className="w-6 h-6 mr-2" />
+                Ver Demonstração
               </a>
             </Button>
           </div>
+
+          {/* Trust Badge */}
+          <p className="text-sm text-muted-foreground mb-16 animate-fade-in">
+            ✓ Sem cartão de crédito • ✓ Cancele quando quiser
+          </p>
 
           {/* Social proof */}
           <div className="flex flex-col sm:flex-row items-center justify-center gap-8 text-sm text-muted-foreground">

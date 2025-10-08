@@ -15,23 +15,29 @@ const Header = () => {
         </div>
 
         <nav className="hidden md:flex items-center gap-8">
-          <a href="#features" className="text-muted-foreground hover:text-foreground transition-colors">
-            Funcionalidades
+          <a href="#" className="text-muted-foreground hover:text-foreground transition-colors font-medium">
+            Início
           </a>
-          <a href="#pricing" className="text-muted-foreground hover:text-foreground transition-colors">
+          <a href="#solution" className="text-muted-foreground hover:text-foreground transition-colors font-medium">
+            Como Funciona
+          </a>
+          <a href="#pricing" className="text-muted-foreground hover:text-foreground transition-colors font-medium">
             Preços
           </a>
-          <a href="#about" className="text-muted-foreground hover:text-foreground transition-colors">
-            Sobre
+          <a href="#faq" className="text-muted-foreground hover:text-foreground transition-colors font-medium">
+            FAQ
           </a>
         </nav>
 
         <div className="flex items-center gap-4">
           <Button variant="ghost" className="hidden md:inline-flex" asChild>
-            <a href="/dashboard">Entrar</a>
+            <a href="/dashboard">Login</a>
           </Button>
-          <Button className="btn-hero" asChild>
-            <a href="/dashboard">Começar Grátis</a>
+          <Button className="btn-hero hover-lift" asChild>
+            <a href="/dashboard">
+              <Zap className="w-4 h-4 mr-2" />
+              Começar 7 Dias Grátis
+            </a>
           </Button>
         </div>
       </div>

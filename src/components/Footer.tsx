@@ -75,11 +75,15 @@ const Footer = () => {
           </div>
         </div>
 
-        <div className="border-t border-border mt-12 pt-8 text-center">
-          <p className="text-sm text-muted-foreground">
-            © 2024 ConfidenceSpeak. Todos os direitos reservados. 
-            Feito com ❤️ para profissionais brasileiros.
-          </p>
+        <div className="border-t border-border mt-12 pt-8">
+          <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+            <p className="text-sm text-muted-foreground">
+              © 2025 ConfidenceSpeak. Todos os direitos reservados.
+            </p>
+            <p className="text-sm text-muted-foreground">
+              Feito com ❤️ para profissionais brasileiros
+            </p>
+          </div>
         </div>
       </div>
     </footer>
