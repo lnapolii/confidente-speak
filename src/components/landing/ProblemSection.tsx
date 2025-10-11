@@ -4,42 +4,39 @@ import { Frown, UserX, TrendingDown } from "lucide-react";
 const ProblemSection = () => {
   const problems = [
     {
-      icon: <Frown className="w-12 h-12" />,
-      title: "Travou na reunião em inglês",
-      description: "Aquele momento constrangedor quando você sabe o que quer dizer mas as palavras não saem"
+      icon: "😰",
+      title: "Travou na call em inglês",
+      description: "Todos esperando você falar..."
     },
     {
-      icon: <UserX className="w-12 h-12" />,
+      icon: "🤐",
       title: "Evitou falar por insegurança",
-      description: "Deixou de contribuir em discussões importantes por medo de errar ou não ser compreendido"
+      description: "Perdeu chance de brilhar"
     },
     {
-      icon: <TrendingDown className="w-12 h-12" />,
-      title: "Perdeu oportunidades",
-      description: "Viu promoções e projetos internacionais passarem por falta de confiança no inglês"
+      icon: "💼",
+      title: "Oportunidade perdida",
+      description: "Promoção foi para outro"
     }
   ];
 
   return (
-    <section className="py-20 px-4 bg-gradient-to-br from-background-muted via-background to-background-muted">
+    <section className="py-16 px-4 bg-gradient-to-br from-gray-50 to-gray-100">
       <div className="container mx-auto max-w-6xl">
-        <div className="text-center mb-16">
+        <div className="text-center mb-12">
           <h2 className="text-3xl md:text-4xl font-heading font-bold text-foreground mb-4">
-            Você já passou por isso?
+            Você Já Passou Por Isso?
           </h2>
-          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            Se você se identificou com alguma dessas situações, saiba que não está sozinho
-          </p>
         </div>
 
         <div className="grid md:grid-cols-3 gap-8 mb-12">
           {problems.map((problem, index) => (
             <Card 
               key={index} 
-              className="card-elevated hover-lift text-center border-2 border-border/50"
+              className="card-elevated hover-lift text-center border-2 border-border/50 bg-white"
             >
               <CardContent className="p-8">
-                <div className="w-20 h-20 rounded-full bg-gradient-to-br from-warning/20 to-warning/10 flex items-center justify-center mx-auto mb-6 text-warning">
+                <div className="text-6xl mb-6">
                   {problem.icon}
                 </div>
                 <h3 className="text-xl font-heading font-bold text-foreground mb-3">
@@ -54,12 +51,10 @@ const ProblemSection = () => {
         </div>
 
         <div className="text-center">
-          <div className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-gradient-to-r from-primary/10 to-success/10 border-2 border-primary/20">
-            <span className="text-2xl">💡</span>
-            <p className="text-lg font-semibold text-foreground">
-              É hora de mudar isso.
-            </p>
-          </div>
+          <p className="text-xl md:text-2xl font-semibold text-foreground inline-flex items-center gap-2 px-6 py-3">
+            <span className="text-3xl">💡</span>
+            É Hora de Mudar Isso. Definitivamente.
+          </p>
         </div>
       </div>
     </section>

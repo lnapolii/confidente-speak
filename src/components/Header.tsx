@@ -10,7 +10,7 @@ const Header = () => {
             <Zap className="w-6 h-6 text-primary-foreground" />
           </div>
           <h1 className="text-xl font-heading font-bold text-foreground">
-            Confidence<span className="text-gradient-primary">Speak</span>
+            Pro<span className="text-gradient-primary">Speaker</span>
           </h1>
         </div>
 

@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { Zap, Check } from "lucide-react";
+import { Zap } from "lucide-react";
 
 const FinalCTASection = () => {
   return (
@@ -11,52 +11,34 @@ const FinalCTASection = () => {
       </div>
 
       <div className="container mx-auto max-w-4xl text-center relative z-10">
-        <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/20 backdrop-blur text-white text-sm font-medium mb-8">
-          <Zap className="w-4 h-4" />
-          <span>Oferta Especial</span>
-        </div>
-
-        <h2 className="text-4xl md:text-5xl font-heading font-bold text-white mb-6">
-          Pronto Para Falar com Confiança?
-        </h2>
-        
-        <p className="text-xl text-white/90 mb-8 max-w-2xl mx-auto">
-          Comece agora mesmo. 7 dias grátis para você experimentar tudo.
-          Sem cartão de crédito. Sem compromisso.
-        </p>
-
-        {/* Benefits List */}
-        <div className="grid md:grid-cols-2 gap-4 mb-10 max-w-2xl mx-auto text-left">
-          {[
-            "7 dias de acesso completo grátis",
-            "Cancele quando quiser, sem multas",
-            "Suporte dedicado em português",
-            "Novos exercícios toda semana"
-          ].map((benefit, index) => (
-            <div key={index} className="flex items-center gap-3 text-white">
-              <div className="w-6 h-6 rounded-full bg-white/20 flex items-center justify-center flex-shrink-0">
-                <Check className="w-4 h-4" />
-              </div>
-              <span className="text-lg">{benefit}</span>
-            </div>
-          ))}
+        {/* Slogan repetido - memorável */}
+        <div className="mb-8">
+          <p className="text-3xl md:text-4xl font-light text-white mb-6 leading-relaxed">
+            Build your confidence.
+            <br />
+            Develop your English.
+            <br />
+            Unlock your life.
+          </p>
+          <p className="text-lg text-white/80 italic">
+            (Construa sua confiança. Desenvolva seu inglês. Desbloqueie sua vida.)
+          </p>
         </div>
 
         {/* CTA Button */}
-        <div className="space-y-4">
+        <div className="space-y-6 mb-8">
           <Button 
             size="lg"
-            className="bg-white text-primary hover:bg-white/90 text-xl px-12 py-7 h-auto font-bold shadow-2xl hover:scale-105 transition-transform"
+            className="bg-white text-primary hover:bg-white/90 text-2xl px-16 py-8 h-auto font-bold shadow-2xl hover:scale-105 transition-transform"
             asChild
           >
             <a href="/dashboard">
-              <Zap className="w-6 h-6 mr-2" />
-              Começar Agora Grátis
+              🚀 Começar Agora Grátis
             </a>
           </Button>
           
-          <p className="text-white/80 text-sm">
-            Junte-se a <strong className="text-white">500+ profissionais</strong> praticando hoje
+          <p className="text-white text-base">
+            7 dias grátis • Sem cartão de crédito • 500+ profissionais confiam
           </p>
         </div>
 
@@ -64,15 +46,15 @@ const FinalCTASection = () => {
         <div className="mt-12 flex flex-wrap items-center justify-center gap-8">
           <div className="flex items-center gap-2 text-white/90">
             <span className="text-2xl">🔒</span>
-            <span className="text-sm">Pagamento Seguro</span>
+            <span className="text-sm font-semibold">Pagamento Seguro</span>
           </div>
           <div className="flex items-center gap-2 text-white/90">
             <span className="text-2xl">✅</span>
-            <span className="text-sm">Garantia de 7 dias</span>
+            <span className="text-sm font-semibold">Garantia de 7 dias</span>
           </div>
           <div className="flex items-center gap-2 text-white/90">
             <span className="text-2xl">⭐</span>
-            <span className="text-sm">4.9/5 Avaliação</span>
+            <span className="text-sm font-semibold">4.9/5 Avaliação</span>
           </div>
         </div>
       </div>

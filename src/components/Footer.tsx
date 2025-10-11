@@ -12,7 +12,7 @@ const Footer = () => {
                 <Zap className="w-5 h-5 text-primary-foreground" />
               </div>
               <h3 className="text-lg font-heading font-bold text-foreground">
-                Confidence<span className="text-gradient-primary">Speak</span>
+                Pro<span className="text-gradient-primary">Speaker</span>
               </h3>
             </div>
             <p className="text-sm text-muted-foreground">
@@ -78,7 +78,7 @@ const Footer = () => {
         <div className="border-t border-border mt-12 pt-8">
           <div className="flex flex-col md:flex-row items-center justify-between gap-4">
             <p className="text-sm text-muted-foreground">
-              © 2025 ConfidenceSpeak. Todos os direitos reservados.
+              © 2025 ProSpeaker. Todos os direitos reservados.
             </p>
             <p className="text-sm text-muted-foreground">
               Feito com ❤️ para profissionais brasileiros

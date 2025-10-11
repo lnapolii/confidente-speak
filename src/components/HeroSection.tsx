@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { Play, Star, Zap, Users } from "lucide-react";
+import { Zap, Star } from "lucide-react";
 import heroInterface from "@/assets/hero-interface.jpg";
 
 const HeroSection = () => {
@@ -10,67 +10,66 @@ const HeroSection = () => {
       
       <div className="container mx-auto max-w-6xl relative">
         <div className="text-center mb-16">
-          {/* Badge */}
-          <div className="inline-flex items-center gap-2 px-5 py-3 rounded-full bg-success-muted text-success-dark text-sm font-bold mb-8 animate-bounce-in shadow-lg border-2 border-success/20">
-            <Star className="w-5 h-5 fill-success text-success" />
-            <span>7 dias grátis • Sem cartão de crédito • Sem compromisso</span>
+          {/* Slogan Principal - Destaque */}
+          <div className="mb-12 animate-fade-in">
+            <p className="text-2xl md:text-3xl font-light text-muted-foreground mb-4 leading-relaxed">
+              Build your confidence.
+              <br />
+              Develop your English.
+              <br />
+              Unlock your life.
+            </p>
+            <p className="text-sm text-muted-foreground italic">
+              (Construa sua confiança. Desenvolva seu inglês. Desbloqueie sua vida.)
+            </p>
           </div>
 
           {/* Main heading */}
-          <h1 className="hero-title mb-6 animate-fade-in">
-            Fale Inglês com{" "}
-            <span className="text-gradient-primary">Confiança</span>{" "}
-            em Reuniões Corporativas
+          <h1 className="text-4xl md:text-5xl lg:text-6xl font-heading font-bold text-foreground mb-6 animate-fade-in leading-tight">
+            Pare de Travar em{" "}
+            <span className="text-gradient-primary">Reuniões em Inglês</span>
           </h1>
 
           {/* Subtitle */}
-          <p className="hero-subtitle mb-10 animate-slide-up">
-            Apenas 5 minutos por dia. IA analisa sua pronúncia em tempo real.
+          <p className="text-xl md:text-2xl text-muted-foreground mb-10 animate-slide-up max-w-3xl mx-auto">
+            5 minutos por dia. IA analisa sua pronúncia.
             <br />
-            <strong className="text-foreground">Transforme insegurança em confiança profissional.</strong>
+            <strong className="text-foreground">Resultados em 7 dias.</strong>
           </p>
 
-          {/* CTA Buttons */}
-          <div className="flex flex-col sm:flex-row gap-4 justify-center mb-6">
-            <Button size="lg" className="btn-hero hover-lift px-10 py-7 text-xl h-auto font-bold shadow-xl" asChild>
+          {/* CTA Button */}
+          <div className="flex flex-col items-center gap-4 mb-6">
+            <Button size="lg" className="btn-hero hover-lift px-12 py-8 text-2xl h-auto font-bold shadow-2xl" asChild>
               <a href="/dashboard">
-                <Zap className="w-6 h-6 mr-2" />
                 🚀 Começar 7 Dias Grátis
               </a>
             </Button>
-            <Button size="lg" variant="outline" className="px-10 py-7 text-xl h-auto border-2 hover:bg-accent font-semibold" asChild>
-              <a href="/exercise">
-                <Play className="w-6 h-6 mr-2" />
-                Ver Demonstração
-              </a>
-            </Button>
+            
+            <p className="text-sm text-muted-foreground">
+              ✓ Sem cartão • ✓ Cancele quando quiser
+            </p>
           </div>
 
-          {/* Trust Badge */}
-          <p className="text-sm text-muted-foreground mb-16 animate-fade-in">
-            ✓ Sem cartão de crédito • ✓ Cancele quando quiser
-          </p>
-
           {/* Social proof */}
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-8 text-sm text-muted-foreground">
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-6 text-sm text-muted-foreground mb-16">
             <div className="flex items-center gap-2">
               <div className="flex -space-x-2">
-                {[1, 2, 3].map((i) => (
+                {[1, 2, 3, 4].map((i) => (
                   <div
                     key={i}
-                    className="w-8 h-8 rounded-full bg-gradient-primary border-2 border-background"
+                    className="w-10 h-10 rounded-full bg-gradient-primary border-2 border-background"
                   />
                 ))}
               </div>
-              <span>+500 profissionais já praticando</span>
+              <span className="font-semibold">+500 profissionais já praticando</span>
             </div>
             <div className="flex items-center gap-2">
-              <div className="flex gap-1">
+              <div className="flex gap-0.5">
                 {[1, 2, 3, 4, 5].map((i) => (
-                  <Star key={i} className="w-4 h-4 fill-warning text-warning" />
+                  <Star key={i} className="w-5 h-5 fill-warning text-warning" />
                 ))}
               </div>
-              <span>4.9/5 (127 avaliações)</span>
+              <span className="font-semibold">4.9/5.0</span>
             </div>
           </div>
         </div>
@@ -78,10 +77,10 @@ const HeroSection = () => {
         {/* Hero visual */}
         <div className="relative">
           <div className="card-elevated max-w-4xl mx-auto p-8 animate-fade-in">
-            <div className="aspect-video rounded-xl overflow-hidden border border-border">
+            <div className="aspect-video rounded-xl overflow-hidden border-2 border-primary/20 shadow-2xl">
               <img 
                 src={heroInterface}
-                alt="Interface da plataforma ConfidenceSpeak mostrando exercícios práticos de inglês corporativo"
+                alt="Interface da plataforma ProSpeaker mostrando exercícios práticos de inglês corporativo com análise de IA"
                 className="w-full h-full object-cover"
               />
             </div>

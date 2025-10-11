@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { useToast } from "@/hooks/use-toast";
 import PronunciationAnalysis from "@/components/PronunciationAnalysis";
+import ReadingExercise from "@/components/ReadingExercise";
 import { useExerciseContent } from "@/components/ExerciseContentGenerator";
 import { 
   Play, 
@@ -297,7 +298,12 @@ const Exercise = () => {
               </Button>
               <div>
                 <h1 className="font-heading font-semibold text-foreground">Team Meeting Discussion</h1>
-                <p className="text-sm text-muted-foreground">Exercício de 10 minutos</p>
+                <p className="text-sm text-muted-foreground">
+                  Exercício de {exerciseDuration} minutos
+                  {exerciseDuration === 5 && " ⚡"}
+                  {exerciseDuration === 10 && " 🎯"}
+                  {exerciseDuration === 15 && " 🚀"}
+                </p>
               </div>
             </div>
             <div className="flex items-center gap-4">
@@ -344,42 +350,10 @@ const Exercise = () => {
         {/* Exercise Content */}
         <Card className="exercise-card">
           {currentStep === 1 && (
-            <>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <BookOpen className="w-5 h-5 text-primary" />
-                  Etapa 1: Leitura e Compreensão
-                </CardTitle>
-                <p className="text-muted-foreground">
-                  Leia o texto abaixo. Clique nas palavras para ver a tradução.
-                </p>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                <div className="reading-text p-6 bg-background-muted rounded-xl">
-                  <InteractiveText text={exerciseText} onWordClick={handleWordClick} />
-                </div>
-
-                <div className="bg-success-muted p-4 rounded-lg">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <Target className="w-5 h-5 text-success" />
-                        <span className="font-medium text-success-dark">Progresso de Compreensão</span>
-                      </div>
-                      <span className="text-sm text-success-dark">{wordsConsulted}/15 palavras consultadas</span>
-                    </div>
-                    <Progress value={(wordsConsulted / 15) * 100} className="mt-2 h-2" />
-                </div>
-
-                <div className="flex justify-end">
-                  <Button 
-                    className="btn-success"
-                    onClick={() => setCurrentStep(2)}
-                  >
-                    Entendi! Próxima Etapa
-                  </Button>
-                </div>
-              </CardContent>
-            </>
+            <ReadingExercise 
+              text={exerciseText}
+              onComplete={() => setCurrentStep(2)}
+            />
           )}
 
           {currentStep === 2 && (

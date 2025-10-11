@@ -164,21 +164,26 @@ const ExerciseLibrary = () => {
                   ))}
                 </div>
 
-                {/* Durations */}
-                <div className="flex items-center gap-4 text-sm text-gray-600">
-                  <div className="flex items-center gap-1">
-                    <Clock className="w-4 h-4" />
-                    <span>5min</span>
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <Clock className="w-4 h-4" />
-                    <span>10min</span>
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <Clock className="w-4 h-4" />
-                    <span>15min</span>
-                  </div>
+                {/* Durations - Mostra todas as 3 opções */}
+                <div className="flex flex-wrap gap-2">
+                  {[5, 10, 15].map((duration) => (
+                    <Badge key={duration} variant="outline" className="text-sm">
+                      <Clock className="w-3 h-3 mr-1" />
+                      {duration} min
+                      {duration === 5 && " ⚡"}
+                      {duration === 10 && " 🎯"}
+                      {duration === 15 && " 🚀"}
+                    </Badge>
+                  ))}
                 </div>
+
+                {/* Badge especial para exercícios de 15min com dicas culturais */}
+                {exercise.duration[15]?.culturalTips && (
+                  <div className="flex items-center gap-2 text-xs bg-purple-50 text-purple-700 px-3 py-2 rounded-lg">
+                    <Star className="w-4 h-4" />
+                    <span className="font-semibold">Versão Avançada com Dicas Culturais</span>
+                  </div>
+                )}
 
                 {/* Focus Points */}
                 <div className="bg-blue-50 rounded-lg p-3">
@@ -190,8 +195,8 @@ const ExerciseLibrary = () => {
                   </p>
                 </div>
 
-                <Button className="w-full">
-                  Começar Exercício
+                <Button className="w-full" asChild>
+                  <a href="/exercise">Começar Exercício</a>
                 </Button>
               </CardContent>
             </Card>
