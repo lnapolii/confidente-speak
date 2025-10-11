@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
+import { ProgressChart } from "@/components/ProgressChart";
 import { 
   Flame, 
   Trophy, 
@@ -13,6 +14,16 @@ import {
   Star,
   Award
 } from "lucide-react";
+
+// Mock data for progress chart
+const mockProgressData = [
+  { date: '15/01', score: 78, exercises: 2 },
+  { date: '16/01', score: 82, exercises: 3 },
+  { date: '17/01', score: 85, exercises: 2 },
+  { date: '18/01', score: 88, exercises: 4 },
+  { date: '19/01', score: 90, exercises: 3 },
+  { date: '20/01', score: 87, exercises: 2 },
+];
 
 const Dashboard = () => {
   return (
@@ -149,29 +160,37 @@ const Dashboard = () => {
               </CardContent>
             </Card>
 
+            {/* Progress Chart */}
+            <ProgressChart data={mockProgressData} title="Seu Progresso Semanal" />
+
             {/* Recent Progress */}
             <Card className="card-elevated">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <TrendingUp className="w-5 h-5 text-success" />
-                  Progresso Recente
+                  Últimos Exercícios
                 </CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
                   {[
-                    { title: "Team Meeting Discussion", score: 92, time: "2h atrás" },
-                    { title: "Client Presentation", score: 88, time: "1 dia atrás" },
-                    { title: "Negotiation Tactics", score: 95, time: "2 dias atrás" }
+                    { title: "Team Meeting Discussion", score: 92, time: "2h atrás", category: "Reuniões" },
+                    { title: "Client Presentation", score: 88, time: "1 dia atrás", category: "Apresentações" },
+                    { title: "Negotiation Tactics", score: 95, time: "2 dias atrás", category: "Negociações" }
                   ].map((item, index) => (
-                    <div key={index} className="flex items-center justify-between p-3 bg-background-muted rounded-lg">
-                      <div>
-                        <p className="font-medium text-foreground">{item.title}</p>
-                        <p className="text-sm text-muted-foreground">{item.time}</p>
+                    <div key={index} className="flex items-center justify-between p-4 bg-background-muted rounded-lg hover-lift transition-all">
+                      <div className="flex-1">
+                        <p className="font-medium text-foreground mb-1">{item.title}</p>
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs px-2 py-1 bg-primary/10 text-primary rounded-full">
+                            {item.category}
+                          </span>
+                          <span className="text-sm text-muted-foreground">{item.time}</span>
+                        </div>
                       </div>
                       <div className="text-right">
-                        <div className="text-lg font-bold text-success">{item.score}%</div>
-                        <div className="text-xs text-muted-foreground">Precisão</div>
+                        <div className="text-2xl font-bold text-success">{item.score}%</div>
+                        <div className="text-xs text-muted-foreground">Score</div>
                       </div>
                     </div>
                   ))}

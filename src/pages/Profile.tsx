@@ -122,6 +122,145 @@ const mockConsultedWords: ConsultedWord[] = [
   }
 ];
 
+// Vocabulary Card Component
+const VocabularyCard = ({ word }: { word: ConsultedWord }) => {
+  const [isExpanded, setIsExpanded] = useState(false);
+
+  const playWordAudio = async (text: string) => {
+    const utterance = new SpeechSynthesisUtterance(text);
+    const voices = speechSynthesis.getVoices();
+    const americanVoice = voices.find(voice => 
+      voice.lang === 'en-US' && voice.name.includes('Google')
+    ) || voices.find(voice => voice.lang === 'en-US') || voices[0];
+    
+    utterance.voice = americanVoice;
+    utterance.rate = 0.8;
+    utterance.lang = 'en-US';
+    speechSynthesis.speak(utterance);
+  };
+
+  return (
+    <Card className="card-elevated hover-lift cursor-pointer transition-all">
+      <CardContent className="p-6" onClick={() => setIsExpanded(!isExpanded)}>
+        {/* Header */}
+        <div className="flex items-start justify-between mb-4">
+          <div className="flex-1">
+            <div className="flex items-center gap-3 mb-2">
+              <h3 className="text-2xl font-bold text-foreground">{word.english}</h3>
+              {word.isFavorite && <Heart className="w-5 h-5 text-warning fill-warning" />}
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  playWordAudio(word.english);
+                }}
+                className="h-8"
+              >
+                <Volume2 className="w-4 h-4" />
+              </Button>
+            </div>
+            {word.phonetic && (
+              <p className="text-muted-foreground italic mb-2">/{word.phonetic}/</p>
+            )}
+            <p className="text-lg text-primary font-medium">{word.translation}</p>
+          </div>
+
+          <div className="flex flex-col items-end gap-2">
+            <span className="px-3 py-1 bg-primary/10 text-primary rounded-full text-xs font-semibold">
+              {word.category}
+            </span>
+            <div className="flex items-center gap-1 text-sm text-muted-foreground">
+              <RotateCcw className="w-3 h-3" />
+              <span>{word.lookupCount}x consultada</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Context */}
+        <div className="bg-muted p-3 rounded-lg mb-4">
+          <p className="text-sm italic text-muted-foreground">
+            "{word.context}"
+          </p>
+        </div>
+
+        {/* Expanded Content */}
+        {isExpanded && (
+          <div className="space-y-4 border-t border-border pt-4 animate-fade-in">
+            {/* Examples */}
+            {word.examples && word.examples.length > 0 && (
+              <div>
+                <h4 className="font-semibold text-foreground mb-2 flex items-center gap-2">
+                  <span>📝</span> Exemplos de Uso
+                </h4>
+                <div className="space-y-2">
+                  {word.examples.map((example, idx) => (
+                    <div key={idx} className="bg-background-muted p-3 rounded-lg">
+                      <p className="text-foreground mb-1">{example.sentence}</p>
+                      <p className="text-sm text-muted-foreground italic">{example.translation}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Synonyms */}
+            {word.synonyms && word.synonyms.length > 0 && (
+              <div>
+                <h4 className="font-semibold text-foreground mb-2 flex items-center gap-2">
+                  <span>🔄</span> Sinônimos
+                </h4>
+                <div className="flex flex-wrap gap-2">
+                  {word.synonyms.map((syn, idx) => (
+                    <span key={idx} className="px-3 py-1 bg-accent text-accent-foreground rounded-full text-sm">
+                      {syn}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Usage Tip */}
+            {word.usageTip && (
+              <div className="bg-success-muted border-l-4 border-success p-3 rounded">
+                <h4 className="font-semibold text-success-dark mb-1 flex items-center gap-2">
+                  <span>💡</span> Dica de Uso
+                </h4>
+                <p className="text-sm text-foreground">{word.usageTip}</p>
+              </div>
+            )}
+
+            {/* Consultation History */}
+            <div>
+              <h4 className="font-semibold text-foreground mb-2 flex items-center gap-2">
+                <span>📊</span> Histórico de Consultas
+              </h4>
+              <div className="space-y-2">
+                {word.consultationHistory.map((history, idx) => (
+                  <div key={idx} className="flex items-center justify-between text-sm bg-background-muted p-2 rounded">
+                    <span className="text-foreground">{history.exerciseTopic}</span>
+                    <div className="flex items-center gap-2 text-muted-foreground">
+                      <Clock className="w-3 h-3" />
+                      <span>{history.exerciseDuration} min</span>
+                      <span>•</span>
+                      <span>{new Date(history.date).toLocaleDateString('pt-BR')}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Expand/Collapse Indicator */}
+        <div className="text-center mt-4 text-sm text-muted-foreground">
+          {isExpanded ? '▲ Clique para ocultar' : '▼ Clique para ver mais detalhes'}
+        </div>
+      </CardContent>
+    </Card>
+  );
+};
+
 const Profile = () => {
   const [activeTab, setActiveTab] = useState('overview');
   const [searchTerm, setSearchTerm] = useState('');
@@ -470,153 +609,6 @@ const Profile = () => {
         )}
       </main>
     </div>
-  );
-};
-
-const VocabularyCard = ({ word }: { word: ConsultedWord }) => {
-  const [showDetails, setShowDetails] = useState(false);
-  const [isFavorite, setIsFavorite] = useState(word.isFavorite);
-
-  const playWordAudio = async (text: string) => {
-    const utterance = new SpeechSynthesisUtterance(text);
-    const voices = speechSynthesis.getVoices();
-    const americanVoice = voices.find(voice => 
-      voice.lang === 'en-US' && voice.name.includes('Google')
-    ) || voices.find(voice => voice.lang === 'en-US') || voices[0];
-    
-    utterance.voice = americanVoice;
-    utterance.rate = 0.8;
-    utterance.lang = 'en-US';
-    speechSynthesis.speak(utterance);
-  };
-
-  const formatDate = (date: Date) => {
-    return new Intl.DateTimeFormat('pt-BR', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric'
-    }).format(date);
-  };
-
-  return (
-    <Card className="card-elevated hover:shadow-lg transition-all">
-      <CardContent className="p-6">
-        <div className="flex items-start justify-between mb-4">
-          <div className="flex-1">
-            <div className="flex items-center gap-3 mb-2">
-              <h3 className="text-2xl font-bold text-foreground">{word.english}</h3>
-              <Button
-                size="sm"
-                variant="ghost"
-                onClick={() => playWordAudio(word.english)}
-              >
-                <Volume2 className="w-4 h-4" />
-              </Button>
-            </div>
-            {word.phonetic && (
-              <p className="text-sm text-muted-foreground italic mb-2">/{word.phonetic}/</p>
-            )}
-            <p className="text-lg text-foreground">{word.translation}</p>
-          </div>
-
-          <Button
-            size="sm"
-            variant="ghost"
-            onClick={() => setIsFavorite(!isFavorite)}
-          >
-            {isFavorite ? <Heart className="w-5 h-5 fill-current text-red-500" /> : <Heart className="w-5 h-5" />}
-          </Button>
-        </div>
-
-        {/* Metadata */}
-        <div className="flex flex-wrap gap-2 mb-4">
-          <span className="px-2 py-1 bg-primary/10 text-primary rounded text-xs font-medium">
-            {word.category}
-          </span>
-          <span className="px-2 py-1 bg-muted text-muted-foreground rounded text-xs">
-            Consultada {word.lookupCount}x
-          </span>
-          <span className="px-2 py-1 bg-muted text-muted-foreground rounded text-xs">
-            {formatDate(word.lastSeen)}
-          </span>
-        </div>
-
-        {/* Context */}
-        {word.context && (
-          <div className="bg-warning/10 border-l-4 border-warning p-3 rounded mb-4">
-            <p className="text-sm text-foreground">
-              <span className="font-semibold">Contexto: </span>
-              {word.context}
-            </p>
-          </div>
-        )}
-
-        {/* Toggle Details */}
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => setShowDetails(!showDetails)}
-          className="text-primary hover:text-primary/80"
-        >
-          {showDetails ? '▼ Ver menos' : '▶ Ver mais detalhes'}
-        </Button>
-
-        {/* Expanded Details */}
-        {showDetails && (
-          <div className="mt-4 pt-4 border-t space-y-4">
-            {/* Examples */}
-            {word.examples && word.examples.length > 0 && (
-              <div>
-                <h4 className="font-bold text-foreground mb-2">📝 Exemplos de uso:</h4>
-                <div className="space-y-2">
-                  {word.examples.map((example, i) => (
-                    <div key={i} className="bg-muted p-3 rounded">
-                      <p className="text-foreground mb-1">{example.sentence}</p>
-                      <p className="text-muted-foreground italic text-sm">{example.translation}</p>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* Synonyms */}
-            {word.synonyms && word.synonyms.length > 0 && (
-              <div>
-                <h4 className="font-bold text-foreground mb-2">🔄 Sinônimos:</h4>
-                <div className="flex flex-wrap gap-2">
-                  {word.synonyms.map((syn, i) => (
-                    <span key={i} className="px-2 py-1 bg-success/10 text-success rounded text-sm">
-                      {syn}
-                    </span>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* Usage Tip */}
-            {word.usageTip && (
-              <div className="bg-purple-50 border-l-4 border-purple-400 p-3 rounded">
-                <p className="text-sm">
-                  <span className="font-bold">💡 Dica: </span>
-                  {word.usageTip}
-                </p>
-              </div>
-            )}
-
-            {/* Actions */}
-            <div className="flex gap-3">
-              <Button size="sm" className="flex-1">
-                🎯 Praticar
-              </Button>
-              <Button size="sm" variant="outline" className="flex-1">
-                <RotateCcw className="w-3 h-3 mr-1" />
-                Revisar
-              </Button>
-            </div>
-          </div>
-        )}
-      </CardContent>
-    </Card>
   );
 };
 

@@ -130,6 +130,31 @@ const Exercise = () => {
   const exerciseContent = useExerciseContent(exerciseTopic, exerciseDuration);
   const exerciseText = exerciseContent.text;
 
+  // Track exercise timer
+  const [elapsedTime, setElapsedTime] = useState(0);
+  const [isTimerRunning, setIsTimerRunning] = useState(true);
+
+  useEffect(() => {
+    if (!isTimerRunning) return;
+    
+    const interval = setInterval(() => {
+      setElapsedTime(prev => prev + 1);
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [isTimerRunning]);
+
+  const formatTime = (seconds: number) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins}:${secs.toString().padStart(2, '0')}`;
+  };
+
+  const calculateProgress = () => {
+    const totalSteps = 3;
+    return (currentStep / totalSteps) * 100;
+  };
+
   // TTS functionality
   const generateSpeech = async (text: string) => {
     return new Promise<void>((resolve) => {
@@ -278,9 +303,9 @@ const Exercise = () => {
             <div className="flex items-center gap-4">
               <div className="flex items-center gap-2 text-sm text-muted-foreground">
                 <Clock className="w-4 h-4" />
-                8:32 restantes
+                {formatTime(elapsedTime)}
               </div>
-              <Progress value={25} className="w-24 h-2" />
+              <Progress value={calculateProgress()} className="w-24 h-2" />
             </div>
           </div>
         </div>
