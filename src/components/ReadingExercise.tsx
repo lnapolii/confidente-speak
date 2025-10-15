@@ -2,41 +2,24 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
-import { Target, Volume2, X } from "lucide-react";
+import { Target, Volume2, X, Loader2 } from "lucide-react";
+import { translateWordWithCache, type TranslationResult } from "@/services/translationService";
 
 interface ReadingExerciseProps {
   text: string;
   onComplete: () => void;
 }
 
-// Dicionário offline básico
-const dictionary: Record<string, { primary: string; alternatives: string[]; example?: string }> = {
-  meeting: { primary: "reunião", alternatives: ["encontro", "assembleia"], example: "We have a meeting at 3 PM" },
-  deadline: { primary: "prazo", alternatives: ["prazo final", "data limite"] },
-  productive: { primary: "produtivo", alternatives: ["eficiente", "eficaz"] },
-  feedback: { primary: "feedback", alternatives: ["retorno", "avaliação"] },
-  blocker: { primary: "bloqueio", alternatives: ["impedimento", "obstáculo"] },
-  stakeholder: { primary: "stakeholder", alternatives: ["parte interessada"] },
-  prototype: { primary: "protótipo", alternatives: ["modelo", "esboço"] },
-  wrapped: { primary: "finalizei", alternatives: ["concluí", "terminei"] },
-  circulated: { primary: "circulei", alternatives: ["distribuí", "compartilhei"] },
-  incorporate: { primary: "incorporar", alternatives: ["incluir", "integrar"] },
-  guidance: { primary: "orientação", alternatives: ["direção", "ajuda"] },
-  anticipate: { primary: "antecipar", alternatives: ["prever", "esperar"] },
-  swamped: { primary: "sobrecarregado", alternatives: ["atolado", "ocupado demais"] },
-  knocked: { primary: "finalizamos", alternatives: ["concluímos", "resolvemos"] },
-  edge: { primary: "casos extremos", alternatives: ["situações limite"] },
-  pivot: { primary: "mudar de direção", alternatives: ["ajustar estratégia"] },
-};
-
 const ReadingExercise = ({ text, onComplete }: ReadingExerciseProps) => {
   const [consultedWords, setConsultedWords] = useState<Set<string>>(new Set());
   const [activeWord, setActiveWord] = useState<{ word: string; original: string } | null>(null);
-  const [translation, setTranslation] = useState<{ primary: string; alternatives: string[]; example?: string } | null>(null);
+  const [translation, setTranslation] = useState<TranslationResult | null>(null);
+  const [loading, setLoading] = useState(false);
 
+  const MINIMUM_WORDS = 5;
   const totalWords = text.split(' ').filter(w => w.length > 3).length;
-  const progressPercentage = (consultedWords.size / totalWords) * 100;
-  const canProceed = progressPercentage >= 30; // Reduzido para 30% para facilitar teste
+  const progressPercentage = (consultedWords.size / MINIMUM_WORDS) * 100;
+  const canProceed = consultedWords.size >= MINIMUM_WORDS;
 
   const processText = (text: string) => {
     const sentences = text.split('\n');
@@ -79,23 +62,30 @@ const ReadingExercise = ({ text, onComplete }: ReadingExerciseProps) => {
     });
   };
 
-  const handleWordClick = (cleanWord: string, originalWord: string) => {
+  const handleWordClick = async (cleanWord: string, originalWord: string) => {
     if (activeWord?.word === cleanWord) {
       setActiveWord(null);
       setTranslation(null);
       return;
     }
 
+    setLoading(true);
     setActiveWord({ word: cleanWord, original: originalWord });
     
-    // Buscar tradução no dicionário
-    const translationData = dictionary[cleanWord] || {
-      primary: "tradução não disponível",
-      alternatives: ["consulte um dicionário online"]
-    };
-    
-    setTranslation(translationData);
-    setConsultedWords(prev => new Set([...prev, cleanWord]));
+    try {
+      // Buscar tradução com IA (com cache e fallback)
+      const translationData = await translateWordWithCache(cleanWord, text);
+      setTranslation(translationData);
+      setConsultedWords(prev => new Set([...prev, cleanWord]));
+    } catch (error) {
+      console.error('Erro ao traduzir palavra:', error);
+      setTranslation({
+        primary: "erro ao carregar tradução",
+        alternatives: ["tente novamente"],
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleCloseTranslation = () => {
@@ -122,31 +112,37 @@ const ReadingExercise = ({ text, onComplete }: ReadingExerciseProps) => {
       </CardHeader>
       
       <CardContent className="space-y-6">
-        {/* Progresso */}
-        <div className="p-4 bg-blue-50 rounded-lg">
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-sm font-semibold text-gray-700">
-              Progresso de Leitura
-            </span>
-            <span className="text-sm text-gray-600">
-              {consultedWords.size} / {totalWords} palavras consultadas
-            </span>
-          </div>
-          <Progress value={progressPercentage} className="h-2.5" />
-          {canProceed && (
-            <p className="text-sm text-green-600 font-semibold mt-2">
-              ✓ Compreensão atingida! Você pode continuar.
-            </p>
-          )}
+      {/* Progresso */}
+      <div className="p-4 bg-blue-50 rounded-lg">
+        <div className="flex items-center justify-between mb-2">
+          <span className="text-sm font-semibold text-gray-700">
+            Palavras Consultadas
+          </span>
+          <span className={`text-lg font-bold ${canProceed ? 'text-green-600' : 'text-blue-600'}`}>
+            {consultedWords.size} / {MINIMUM_WORDS} mínimo
+          </span>
         </div>
-
-        {/* Instrução */}
-        <div className="p-4 bg-yellow-50 border-l-4 border-yellow-400 rounded">
-          <p className="text-sm text-gray-700">
-            💡 <strong>Dica:</strong> Clique nas palavras que não conhece para ver a tradução.
-            Meta: entender pelo menos 30% do texto.
+        <Progress 
+          value={Math.min(progressPercentage, 100)} 
+          className={`h-3 ${canProceed ? '[&>div]:bg-green-500' : ''}`}
+        />
+        {canProceed ? (
+          <p className="text-sm text-green-600 font-semibold mt-2 flex items-center gap-2">
+            ✓ Pronto! Você pode continuar para a próxima etapa.
           </p>
-        </div>
+        ) : (
+          <p className="text-sm text-gray-600 mt-2">
+            Clique em pelo menos {MINIMUM_WORDS - consultedWords.size} palavra(s) mais para continuar
+          </p>
+        )}
+      </div>
+
+      {/* Instrução */}
+      <div className="p-4 bg-yellow-50 border-l-4 border-yellow-400 rounded">
+        <p className="text-sm text-gray-700">
+          💡 <strong>Dica:</strong> Clique em pelo menos {MINIMUM_WORDS} palavras para ver suas traduções e poder avançar.
+        </p>
+      </div>
 
         {/* Texto do exercício */}
         <div className="bg-white p-8 rounded-xl shadow-md relative">
@@ -166,7 +162,10 @@ const ReadingExercise = ({ text, onComplete }: ReadingExerciseProps) => {
               }
             `}
           >
-            {canProceed ? 'Continuar para Listening →' : 'Consulte mais palavras para continuar'}
+            {canProceed 
+              ? 'Continuar para Listening →' 
+              : `Consulte mais ${MINIMUM_WORDS - consultedWords.size} palavra(s)`
+            }
           </Button>
         </div>
 
@@ -205,60 +204,82 @@ const ReadingExercise = ({ text, onComplete }: ReadingExerciseProps) => {
                 </button>
               </div>
 
-              {/* Tradução principal */}
-              <div className="mb-4">
-                <span className="text-sm text-gray-500 font-semibold">
-                  Tradução Principal:
-                </span>
-                <p className="text-xl text-blue-600 font-bold mt-1">
-                  {translation.primary}
-                </p>
-              </div>
+              {loading ? (
+                <div className="flex flex-col items-center justify-center py-8">
+                  <Loader2 className="w-8 h-8 animate-spin text-blue-600 mb-2" />
+                  <p className="text-sm text-gray-500">Traduzindo...</p>
+                </div>
+              ) : translation ? (
+                <>
+                  {/* Fonética */}
+                  {translation.phonetic && (
+                    <p className="text-gray-500 italic mb-4">/{translation.phonetic}/</p>
+                  )}
 
-              {/* Traduções alternativas */}
-              {translation.alternatives && translation.alternatives.length > 0 && (
-                <div className="mb-4">
-                  <span className="text-sm text-gray-500 font-semibold">
-                    Outras Traduções:
-                  </span>
-                  <div className="flex flex-wrap gap-2 mt-2">
-                    {translation.alternatives.map((alt, idx) => (
-                      <span 
-                        key={idx}
-                        className="px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-sm"
-                      >
-                        {alt}
-                      </span>
-                    ))}
+                  {/* Tradução principal */}
+                  <div className="mb-4">
+                    <span className="text-sm text-gray-500 font-semibold">
+                      Tradução Principal:
+                    </span>
+                    <p className="text-xl text-blue-600 font-bold mt-1">
+                      {translation.primary}
+                    </p>
                   </div>
-                </div>
-              )}
 
-              {/* Exemplo de uso */}
-              {translation.example && (
-                <div className="mb-4 p-3 bg-blue-50 rounded-lg">
-                  <span className="text-xs text-gray-500 font-semibold">
-                    Exemplo:
-                  </span>
-                  <p className="text-sm text-gray-700 italic mt-1">
-                    "{translation.example}"
+                  {/* Traduções alternativas */}
+                  {translation.alternatives && translation.alternatives.length > 0 && (
+                    <div className="mb-4">
+                      <span className="text-sm text-gray-500 font-semibold">
+                        Outras Traduções:
+                      </span>
+                      <div className="flex flex-wrap gap-2 mt-2">
+                        {translation.alternatives.map((alt, idx) => (
+                          <span 
+                            key={idx}
+                            className="px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-sm"
+                          >
+                            {alt}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Exemplo de uso */}
+                  {translation.example && (
+                    <div className="mb-4 p-3 bg-blue-50 rounded-lg">
+                      <span className="text-xs text-gray-500 font-semibold">
+                        Exemplo corporativo:
+                      </span>
+                      <p className="text-sm text-gray-700 italic mt-1">
+                        "{translation.example}"
+                      </p>
+                    </div>
+                  )}
+
+                  {/* Dica de aprendizado */}
+                  {translation.tip && (
+                    <div className="mb-4 p-3 bg-yellow-50 border-l-4 border-yellow-400 rounded">
+                      <span className="text-xs text-gray-700 font-semibold">💡 Dica:</span>
+                      <p className="text-sm text-gray-700 mt-1">{translation.tip}</p>
+                    </div>
+                  )}
+
+                  {/* Botão de áudio */}
+                  <button 
+                    onClick={() => speakWord(activeWord.word)}
+                    className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-lg font-semibold transition-all flex items-center justify-center gap-2"
+                  >
+                    <Volume2 className="w-5 h-5" />
+                    Ouvir Pronúncia
+                  </button>
+
+                  {/* Badge IA */}
+                  <p className="text-xs text-center text-gray-400 mt-3">
+                    ✨ Traduzido com IA | ✓ Salvo na biblioteca
                   </p>
-                </div>
-              )}
-
-              {/* Botão de áudio */}
-              <button 
-                onClick={() => speakWord(activeWord.word)}
-                className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-lg font-semibold transition-all flex items-center justify-center gap-2"
-              >
-                <Volume2 className="w-5 h-5" />
-                Ouvir Pronúncia
-              </button>
-
-              {/* Indicador de salvamento */}
-              <p className="text-xs text-center text-green-600 mt-3 font-semibold">
-                ✓ Salvo na sua biblioteca
-              </p>
+                </>
+              ) : null}
             </div>
           </div>
         </>
