@@ -14,7 +14,87 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      users: {
+        Row: {
+          cancel_at_period_end: boolean | null
+          canceled_at: string | null
+          created_at: string | null
+          current_period_end: string | null
+          current_period_start: string | null
+          email: string
+          email_verified: boolean | null
+          english_level: string | null
+          full_name: string | null
+          how_did_you_hear: string | null
+          id: string
+          job_role: string | null
+          last_login_at: string | null
+          last_payment_amount: number | null
+          last_payment_date: string | null
+          last_payment_failed_at: string | null
+          onboarding_completed: boolean | null
+          phone: string | null
+          plan_type: string | null
+          stripe_customer_id: string | null
+          stripe_subscription_id: string | null
+          subscription_status: string | null
+          trial_ends_at: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          cancel_at_period_end?: boolean | null
+          canceled_at?: string | null
+          created_at?: string | null
+          current_period_end?: string | null
+          current_period_start?: string | null
+          email: string
+          email_verified?: boolean | null
+          english_level?: string | null
+          full_name?: string | null
+          how_did_you_hear?: string | null
+          id?: string
+          job_role?: string | null
+          last_login_at?: string | null
+          last_payment_amount?: number | null
+          last_payment_date?: string | null
+          last_payment_failed_at?: string | null
+          onboarding_completed?: boolean | null
+          phone?: string | null
+          plan_type?: string | null
+          stripe_customer_id?: string | null
+          stripe_subscription_id?: string | null
+          subscription_status?: string | null
+          trial_ends_at?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          cancel_at_period_end?: boolean | null
+          canceled_at?: string | null
+          created_at?: string | null
+          current_period_end?: string | null
+          current_period_start?: string | null
+          email?: string
+          email_verified?: boolean | null
+          english_level?: string | null
+          full_name?: string | null
+          how_did_you_hear?: string | null
+          id?: string
+          job_role?: string | null
+          last_login_at?: string | null
+          last_payment_amount?: number | null
+          last_payment_date?: string | null
+          last_payment_failed_at?: string | null
+          onboarding_completed?: boolean | null
+          phone?: string | null
+          plan_type?: string | null
+          stripe_customer_id?: string | null
+          stripe_subscription_id?: string | null
+          subscription_status?: string | null
+          trial_ends_at?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
