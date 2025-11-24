@@ -1,8 +1,55 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Check, Zap, Crown, Star } from "lucide-react";
+import { useState } from "react";
+import { useToast } from "@/hooks/use-toast";
+import { createCheckoutSession, STRIPE_PRICE_IDS } from "@/services/stripeService";
+import { supabase } from "@/integrations/supabase/client";
 
 const PricingSection = () => {
+  const [loadingPlan, setLoadingPlan] = useState<string | null>(null);
+  const { toast } = useToast();
+
+  const handleSubscribe = async (planType: 'monthly' | 'quarterly' | 'yearly') => {
+    setLoadingPlan(planType);
+
+    try {
+      // Verificar se o usuário está autenticado
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (!session) {
+        toast({
+          title: "Login necessário",
+          description: "Você precisa fazer login para assinar um plano",
+          variant: "destructive",
+        });
+        // Redirecionar para login
+        window.location.href = "/login";
+        return;
+      }
+
+      // Obter o price ID correto
+      const priceId = STRIPE_PRICE_IDS[planType];
+
+      // Criar sessão de checkout
+      await createCheckoutSession({
+        priceId,
+        planType,
+      });
+
+      // O redirecionamento acontece automaticamente dentro de createCheckoutSession
+    } catch (error) {
+      console.error('Error subscribing:', error);
+      toast({
+        title: "Erro ao processar",
+        description: error instanceof Error ? error.message : "Tente novamente mais tarde",
+        variant: "destructive",
+      });
+    } finally {
+      setLoadingPlan(null);
+    }
+  };
+
   const plans = [
     {
       name: "Trial Gratuito",
@@ -18,7 +65,9 @@ const PricingSection = () => {
       ],
       cta: "Começar Grátis",
       popular: false,
-      icon: <Zap className="w-5 h-5" />
+      icon: <Zap className="w-5 h-5" />,
+      planType: null, // Trial não tem planType
+      isTrial: true,
     },
     {
       name: "Mensal",
@@ -35,7 +84,9 @@ const PricingSection = () => {
       ],
       cta: "Assinar Mensal",
       popular: false,
-      icon: <Star className="w-5 h-5" />
+      icon: <Star className="w-5 h-5" />,
+      planType: 'monthly' as const,
+      isTrial: false,
     },
     {
       name: "Trimestral",
@@ -55,7 +106,9 @@ const PricingSection = () => {
       ],
       cta: "Assinar Trimestral",
       popular: true,
-      icon: <Crown className="w-5 h-5" />
+      icon: <Crown className="w-5 h-5" />,
+      planType: 'quarterly' as const,
+      isTrial: false,
     },
     {
       name: "Anual",
@@ -76,7 +129,9 @@ const PricingSection = () => {
       ],
       cta: "Assinar Anual",
       popular: false,
-      icon: <Crown className="w-5 h-5" />
+      icon: <Crown className="w-5 h-5" />,
+      planType: 'yearly' as const,
+      isTrial: false,
     }
   ];
 
@@ -176,9 +231,17 @@ const PricingSection = () => {
                         : ''
                   }`}
                   variant={!plan.popular && index !== 0 ? "outline" : "default"}
-                  asChild
+                  onClick={() => {
+                    if (plan.isTrial) {
+                      // Redirecionar para cadastro/dashboard para trial gratuito
+                      window.location.href = "/onboarding";
+                    } else if (plan.planType) {
+                      handleSubscribe(plan.planType);
+                    }
+                  }}
+                  disabled={loadingPlan === plan.planType}
                 >
-                  <a href="/dashboard">{plan.cta}</a>
+                  {loadingPlan === plan.planType ? 'Processando...' : plan.cta}
                 </Button>
               </CardContent>
             </Card>
