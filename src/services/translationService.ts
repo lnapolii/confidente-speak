@@ -1,5 +1,5 @@
-// Translation Service with AI Integration
-// Supports: OpenAI, Google Translate, and LibreTranslate (fallback)
+// Translation Service with Lovable AI Integration
+import { supabase } from "@/integrations/supabase/client";
 
 export interface TranslationResult {
   primary: string;
@@ -59,6 +59,69 @@ const offlineDictionary: Record<string, TranslationResult> = {
     phonetic: "ˈproʊtətaɪp",
     example: "I'll have a prototype ready by Friday",
     tip: "Proto (primeiro) + type (tipo)"
+  },
+  update: {
+    primary: "atualização",
+    alternatives: ["informar", "reportar"],
+    phonetic: "ʌpˈdeɪt",
+    example: "Here's my update for today",
+    tip: "Up (para cima) + date (data) = atualizar"
+  },
+  bottleneck: {
+    primary: "gargalo",
+    alternatives: ["bloqueio", "impedimento"],
+    phonetic: "ˈbɒtlnek",
+    example: "This was becoming a bottleneck",
+    tip: "Bottle (garrafa) + neck (pescoço) = gargalo"
+  },
+  backlog: {
+    primary: "backlog",
+    alternatives: ["acúmulo", "fila de tarefas"],
+    phonetic: "ˈbæklɒɡ",
+    example: "It's been sitting in our backlog",
+    tip: "Back (atrás) + log (registro) = acúmulo de tarefas"
+  },
+  bandwidth: {
+    primary: "capacidade",
+    alternatives: ["tempo disponível", "recursos"],
+    phonetic: "ˈbændwɪdθ",
+    example: "Do you have bandwidth for this?",
+    tip: "Banda larga metafórica = capacidade de fazer coisas"
+  },
+  sync: {
+    primary: "sincronizar",
+    alternatives: ["alinhar", "reunir"],
+    phonetic: "sɪŋk",
+    example: "Let's sync up on this tomorrow",
+    tip: "Sync = sincronizar, alinhar informações"
+  },
+  scope: {
+    primary: "escopo",
+    alternatives: ["alcance", "amplitude"],
+    phonetic: "skoʊp",
+    example: "This is out of scope",
+    tip: "Scope = telescópio/alcance, definir limites"
+  },
+  milestone: {
+    primary: "marco",
+    alternatives: ["etapa importante", "objetivo"],
+    phonetic: "ˈmaɪlstoʊn",
+    example: "We hit an important milestone",
+    tip: "Mile (milha) + stone (pedra) = marco de distância"
+  },
+  deliverable: {
+    primary: "entregável",
+    alternatives: ["resultado", "produto"],
+    phonetic: "dɪˈlɪvərəbl",
+    example: "What are the deliverables?",
+    tip: "Deliver (entregar) + able (possível) = pode ser entregue"
+  },
+  leverage: {
+    primary: "aproveitar",
+    alternatives: ["usar", "alavancar"],
+    phonetic: "ˈlevərɪdʒ",
+    example: "We should leverage our resources",
+    tip: "Lever (alavanca) + age = usar alavancagem"
   },
   wrapped: {
     primary: "finalizei",
@@ -123,62 +186,6 @@ const offlineDictionary: Record<string, TranslationResult> = {
     example: "We might need to pivot our approach",
     tip: "Pivot = pivô, ponto de rotação"
   },
-  update: {
-    primary: "atualização",
-    alternatives: ["informar", "reportar"],
-    phonetic: "ʌpˈdeɪt",
-    example: "Here's my update for today",
-    tip: "Up (para cima) + date (data) = atualizar"
-  },
-  bottleneck: {
-    primary: "gargalo",
-    alternatives: ["bloqueio", "impedimento"],
-    phonetic: "ˈbɒtlnek",
-    example: "This was becoming a bottleneck",
-    tip: "Bottle (garrafa) + neck (pescoço) = gargalo"
-  },
-  backlog: {
-    primary: "backlog",
-    alternatives: ["acúmulo", "fila de tarefas"],
-    phonetic: "ˈbæklɒɡ",
-    example: "It's been sitting in our backlog",
-    tip: "Back (atrás) + log (registro) = acúmulo de tarefas"
-  },
-  bandwidth: {
-    primary: "capacidade",
-    alternatives: ["tempo disponível", "recursos"],
-    phonetic: "ˈbændwɪdθ",
-    example: "Do you have bandwidth for this?",
-    tip: "Banda larga metafórica = capacidade de fazer coisas"
-  },
-  sync: {
-    primary: "sincronizar",
-    alternatives: ["alinhar", "reunir"],
-    phonetic: "sɪŋk",
-    example: "Let's sync up on this tomorrow",
-    tip: "Sync = sincronizar, alinhar informações"
-  },
-  scope: {
-    primary: "escopo",
-    alternatives: ["alcance", "amplitude"],
-    phonetic: "skoʊp",
-    example: "This is out of scope",
-    tip: "Scope = telescópio/alcance, definir limites"
-  },
-  milestone: {
-    primary: "marco",
-    alternatives: ["etapa importante", "objetivo"],
-    phonetic: "ˈmaɪlstoʊn",
-    example: "We hit an important milestone",
-    tip: "Mile (milha) + stone (pedra) = marco de distância"
-  },
-  deliverable: {
-    primary: "entregável",
-    alternatives: ["resultado", "produto"],
-    phonetic: "dɪˈlɪvərəbl",
-    example: "What are the deliverables?",
-    tip: "Deliver (entregar) + able (possível) = pode ser entregue"
-  },
   actionable: {
     primary: "acionável",
     alternatives: ["prático", "aplicável"],
@@ -200,13 +207,6 @@ const offlineDictionary: Record<string, TranslationResult> = {
     example: "I'm being totally transparent here",
     tip: "Ser transparente = ser honesto e aberto"
   },
-  leverage: {
-    primary: "aproveitar",
-    alternatives: ["usar", "alavancar"],
-    phonetic: "ˈlevərɪdʒ",
-    example: "We should leverage our resources",
-    tip: "Lever (alavanca) + age = usar alavancagem"
-  },
   touch: {
     primary: "tocar",
     alternatives: ["contatar", "falar sobre"],
@@ -214,156 +214,6 @@ const offlineDictionary: Record<string, TranslationResult> = {
     example: "Let's touch base on this",
     tip: "'Touch base' = fazer contato, alinhar"
   }
-};
-
-/**
- * Translate word using AI (OpenAI, Google Translate) or fallback to offline dictionary
- */
-export const translateWord = async (
-  word: string,
-  context?: string
-): Promise<TranslationResult> => {
-  const cleanWord = word.toLowerCase().trim();
-
-  // Try AI translation first (if API keys are configured)
-  try {
-    // Check if OpenAI is configured
-    if (import.meta.env.VITE_OPENAI_API_KEY) {
-      return await translateWithOpenAI(cleanWord, context);
-    }
-
-    // Check if Google Translate is configured
-    if (import.meta.env.VITE_GOOGLE_TRANSLATE_API_KEY) {
-      return await translateWithGoogle(cleanWord, context);
-    }
-
-    // If no API keys, use LibreTranslate (free, no key needed)
-    return await translateWithLibre(cleanWord, context);
-
-  } catch (error) {
-    console.warn('AI translation failed, using offline dictionary:', error);
-    // Fallback to offline dictionary
-    return getFallbackTranslation(cleanWord);
-  }
-};
-
-/**
- * OpenAI GPT Translation (best quality, requires API key)
- */
-const translateWithOpenAI = async (
-  word: string,
-  context?: string
-): Promise<TranslationResult> => {
-  const prompt = `You are a Portuguese-English translator specialized in corporate/business English.
-
-Word to translate: "${word}"
-${context ? `Context: "${context}"` : ''}
-
-Provide a JSON response with:
-1. "primary": The most common Portuguese translation
-2. "alternatives": Array of 2-3 alternative translations
-3. "phonetic": IPA phonetic transcription
-4. "example": A corporate/business example sentence in English
-5. "tip": A quick learning tip for Brazilian learners
-
-Return ONLY valid JSON, no other text.`;
-
-  const response = await fetch('https://api.openai.com/v1/chat/completions', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${import.meta.env.VITE_OPENAI_API_KEY}`
-    },
-    body: JSON.stringify({
-      model: 'gpt-4o-mini',
-      messages: [
-        {
-          role: 'system',
-          content: 'You are a professional translator. Always respond with valid JSON only.'
-        },
-        {
-          role: 'user',
-          content: prompt
-        }
-      ],
-      response_format: { type: 'json_object' },
-      temperature: 0.3
-    })
-  });
-
-  if (!response.ok) {
-    throw new Error('OpenAI API request failed');
-  }
-
-  const data = await response.json();
-  return JSON.parse(data.choices[0].message.content);
-};
-
-/**
- * Google Translate API (good quality, cheaper)
- */
-const translateWithGoogle = async (
-  word: string,
-  context?: string
-): Promise<TranslationResult> => {
-  const response = await fetch(
-    `https://translation.googleapis.com/language/translate/v2?key=${import.meta.env.VITE_GOOGLE_TRANSLATE_API_KEY}`,
-    {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        q: word,
-        source: 'en',
-        target: 'pt',
-        format: 'text'
-      })
-    }
-  );
-
-  if (!response.ok) {
-    throw new Error('Google Translate API request failed');
-  }
-
-  const data = await response.json();
-  return {
-    primary: data.data.translations[0].translatedText,
-    alternatives: [],
-    phonetic: '',
-    example: '',
-    tip: ''
-  };
-};
-
-/**
- * LibreTranslate (free, open source, no API key needed)
- */
-const translateWithLibre = async (
-  word: string,
-  context?: string
-): Promise<TranslationResult> => {
-  const response = await fetch('https://libretranslate.com/translate', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      q: word,
-      source: 'en',
-      target: 'pt',
-      format: 'text'
-    })
-  });
-
-  if (!response.ok) {
-    throw new Error('LibreTranslate request failed');
-  }
-
-  const data = await response.json();
-  return {
-    primary: data.translatedText,
-    alternatives: [],
-    phonetic: '',
-    example: '',
-    tip: ''
-  };
 };
 
 /**
@@ -376,14 +226,57 @@ const getFallbackTranslation = (word: string): TranslationResult => {
     return offlineDictionary[cleanWord];
   }
 
-  // If not in dictionary, return basic translation
   return {
     primary: cleanWord,
     alternatives: [],
-    phonetic: '',
-    example: '',
-    tip: 'Tradução não disponível offline. Adicione uma API key para tradução com IA.'
+    phonetic: "",
+    example: "",
+    tip: "Palavra não encontrada no dicionário offline."
   };
+};
+
+/**
+ * Translate word using Lovable AI or fallback to offline dictionary
+ */
+export const translateWord = async (
+  word: string,
+  context?: string
+): Promise<TranslationResult> => {
+  const cleanWord = word.toLowerCase().trim();
+
+  // Check offline dictionary first for common words (faster)
+  if (offlineDictionary[cleanWord]) {
+    return offlineDictionary[cleanWord];
+  }
+
+  // Try AI translation via Edge Function
+  try {
+    const { data, error } = await supabase.functions.invoke("translate", {
+      body: { word: cleanWord, context }
+    });
+
+    if (error) {
+      console.warn("AI translation failed:", error);
+      return getFallbackTranslation(cleanWord);
+    }
+
+    if (data.error) {
+      console.warn("Translation error:", data.error);
+      return getFallbackTranslation(cleanWord);
+    }
+
+    return {
+      primary: data.primary || cleanWord,
+      alternatives: data.alternatives || [],
+      phonetic: data.phonetic || "",
+      example: data.example || "",
+      tip: data.tip || ""
+    };
+
+  } catch (error) {
+    console.warn("AI translation failed, using offline dictionary:", error);
+    return getFallbackTranslation(cleanWord);
+  }
 };
 
 /**
@@ -396,7 +289,7 @@ export const getCachedTranslation = (word: string): TranslationResult | null => 
       return JSON.parse(cached);
     }
   } catch (error) {
-    console.warn('Failed to get cached translation:', error);
+    console.warn("Failed to get cached translation:", error);
   }
   return null;
 };
@@ -411,7 +304,7 @@ export const cacheTranslation = (word: string, translation: TranslationResult): 
       JSON.stringify(translation)
     );
   } catch (error) {
-    console.warn('Failed to cache translation:', error);
+    console.warn("Failed to cache translation:", error);
   }
 };
 
