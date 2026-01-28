@@ -10,12 +10,12 @@ const HeroSection = () => {
       
       <div className="container mx-auto max-w-6xl relative">
         <div className="text-center mb-16">
-          {/* Slogan Principal - Uma linha, menor */}
-          <div className="mb-8 animate-fade-in">
-            <h2 className="text-xl md:text-2xl font-semibold bg-gradient-to-r from-primary to-primary/80 bg-clip-text text-transparent mb-2 leading-relaxed">
+          {/* Slogan Oficial */}
+          <div className="mb-12 animate-fade-in">
+            <h2 className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-primary via-primary/90 to-success bg-clip-text text-transparent mb-3 leading-relaxed">
               Build your confidence. Develop your English. Unlock your life.
             </h2>
-            <p className="text-sm md:text-base text-muted-foreground italic font-light">
+            <p className="text-base md:text-lg text-muted-foreground italic font-light">
               Construa sua confiança. Desenvolva seu inglês. Desbloqueie sua vida.
             </p>
           </div>
