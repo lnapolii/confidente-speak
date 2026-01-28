@@ -16,7 +16,7 @@ const WelcomeScreen = ({ onNext }: WelcomeScreenProps) => {
 
       <div className="space-y-4">
         <h1 className="text-5xl font-bold text-gray-900">
-          Bem-vindo ao ConfidenceSpeak! 👋
+          Bem-vindo ao ProSpeaker! 👋
         </h1>
         <p className="text-xl text-gray-600 max-w-xl mx-auto">
           Em apenas 3 minutos você estará fazendo seu primeiro exercício e ganhando confiança para falar inglês.

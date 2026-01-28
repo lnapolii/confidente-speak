@@ -92,7 +92,7 @@ const FeaturesSection = () => {
         {/* Process flow */}
         <div className="mt-20">
           <h3 className="text-2xl font-heading font-bold text-center text-foreground mb-12">
-            Como Funciona o Método ConfidenceSpeak
+            Como Funciona o Método ProSpeaker
           </h3>
           
           <div className="grid md:grid-cols-3 gap-8">

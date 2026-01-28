@@ -77,7 +77,7 @@ const FAQSection = () => {
             Não encontrou sua resposta?
           </p>
           <a 
-            href="mailto:contato@confidencespeak.com" 
+            href="mailto:contato@prospeaker.com.br" 
             className="inline-flex items-center gap-2 text-primary font-semibold hover:underline"
           >
             <span>📧</span>

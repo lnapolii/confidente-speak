@@ -36,7 +36,7 @@ const Dashboard = () => {
               <Zap className="w-5 h-5 text-primary-foreground" />
             </div>
             <h1 className="text-lg font-heading font-bold text-foreground">
-              Confidence<span className="text-gradient-primary">Speak</span>
+              Pro<span className="text-gradient-primary">Speaker</span>
             </h1>
           </div>
           <div className="flex items-center gap-4">
