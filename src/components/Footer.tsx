@@ -15,10 +15,14 @@ const Footer = () => {
                 Pro<span className="text-gradient-primary">Speaker</span>
               </h3>
             </div>
-            <p className="text-sm text-muted-foreground">
-              Desenvolva confiança em inglês corporativo com exercícios práticos 
-              e gamificação inteligente.
-            </p>
+            <div className="space-y-1">
+              <p className="text-sm font-medium text-muted-foreground italic">
+                Build your confidence. Develop your English. Unlock your life.
+              </p>
+              <p className="text-xs text-muted-foreground/70">
+                Construa sua confiança. Desenvolva seu inglês. Desbloqueie sua vida.
+              </p>
+            </div>
           </div>
 
           {/* Product */}
