@@ -243,6 +243,7 @@ const Exercise = () => {
     const words = exerciseText.split(' ');
     let wordIndex = 0;
     
+    const avgWordDuration = (60 / (150 * playbackSpeed)) * 1000; // ~150 WPM adjusted for speed
     const interval = setInterval(() => {
       setCurrentWordIndex(wordIndex);
       wordIndex++;
@@ -251,7 +252,7 @@ const Exercise = () => {
         clearInterval(interval);
         setCurrentWordIndex(0);
       }
-    }, 500); // Approximate timing
+    }, avgWordDuration);
     
     return () => clearInterval(interval);
   }, [isPlaying]);
