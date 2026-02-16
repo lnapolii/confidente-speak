@@ -10,21 +10,16 @@ const HeroSection = () => {
       
       <div className="container mx-auto max-w-6xl relative">
         <div className="text-center mb-16">
-          {/* Slogan Oficial */}
-          <div className="mb-12 animate-fade-in">
-            <h2 className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-primary via-primary/90 to-success bg-clip-text text-transparent mb-3 leading-relaxed">
-              Build your confidence. Develop your English. Unlock your life.
-            </h2>
-            <p className="text-base md:text-lg text-muted-foreground italic font-light">
-              Construa sua confiança. Desenvolva seu inglês. Desbloqueie sua vida.
-            </p>
-          </div>
-
           {/* Main heading */}
-          <h1 className="text-4xl md:text-5xl lg:text-6xl font-heading font-bold text-foreground mb-6 animate-fade-in leading-tight">
+          <h1 className="text-4xl md:text-5xl lg:text-6xl font-heading font-bold text-foreground mb-4 animate-fade-in leading-tight">
             Pare de Travar em{" "}
             <span className="text-gradient-primary">Reuniões em Inglês</span>
           </h1>
+
+          {/* Slogan - below H1 */}
+          <p className="text-lg font-normal text-foreground/90 mb-10 animate-fade-in">
+            Build Your Confidence. Develop Your English. Unlock Your Life.
+          </p>
 
           {/* Subtitle */}
           <p className="text-xl md:text-2xl text-muted-foreground mb-10 animate-slide-up max-w-3xl mx-auto">
