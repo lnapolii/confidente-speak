@@ -128,7 +128,7 @@ const Signup = () => {
       }
 
       toast.success('Conta criada! Verifique seu e-mail para confirmar.');
-      navigate('/onboarding');
+      navigate('/verify-email');
     } catch (error: any) {
       toast.error(error.message || 'Erro ao criar conta');
     } finally {

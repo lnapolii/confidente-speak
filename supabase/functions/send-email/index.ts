@@ -8,7 +8,7 @@ const corsHeaders = {
 const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY");
 
 interface EmailRequest {
-  type: 'welcome' | 'daily_reminder' | 'progress_report' | 'payment_confirmation' | 'password_reset';
+  type: 'welcome' | 'daily_reminder' | 'progress_report' | 'payment_confirmation' | 'password_reset' | 'email_confirmation';
   to: string;
   data?: Record<string, any>;
 }
@@ -129,6 +129,37 @@ const templates: Record<string, (data: any) => { subject: string; html: string }
             </a>
           </div>
           <p style="color: #94a3b8; font-size: 14px;">Este link expira em 1 hora. Se você não solicitou esta alteração, ignore este email.</p>
+        </div>
+      </div>
+    `,
+  }),
+
+  email_confirmation: (data) => ({
+    subject: "Confirme seu email - ProSpeaker",
+    html: `
+      <div style="font-family: 'Inter', Arial, sans-serif; max-width: 600px; margin: 0 auto; background: #f8fafc; padding: 40px 20px;">
+        <div style="background: white; border-radius: 16px; padding: 40px; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
+          <div style="text-align: center; margin-bottom: 32px;">
+            <h1 style="color: #2563EB; font-size: 28px; margin: 0;">Pro<span style="color: #1e293b;">Speaker</span></h1>
+          </div>
+          <h2 style="color: #1e293b; font-size: 22px; text-align: center;">Confirme seu email ✉️</h2>
+          <p style="color: #64748b; font-size: 16px; line-height: 1.6; text-align: center;">
+            Olá, <strong>${data.name || 'Aluno'}</strong>! Falta só um passo para começar sua jornada de confiança em inglês.
+          </p>
+          <div style="text-align: center; margin: 32px 0;">
+            <a href="${data.confirmUrl || '#'}" 
+               style="background: linear-gradient(135deg, #2563EB, #3b82f6); color: white; padding: 16px 48px; border-radius: 12px; text-decoration: none; font-weight: 700; font-size: 18px; display: inline-block; box-shadow: 0 4px 12px rgba(37,99,235,0.3);">
+              Confirmar Email
+            </a>
+          </div>
+          <p style="color: #94a3b8; font-size: 13px; text-align: center; margin-top: 24px;">
+            Este link expira em 24 horas.<br/>
+            Se você não criou uma conta no ProSpeaker, ignore este email.
+          </p>
+          <hr style="border: none; border-top: 1px solid #e2e8f0; margin: 24px 0;" />
+          <p style="color: #94a3b8; font-size: 12px; text-align: center;">
+            ProSpeaker — Build your confidence. Develop your English. Unlock your life.
+          </p>
         </div>
       </div>
     `,
