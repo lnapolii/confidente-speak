@@ -19,7 +19,7 @@ const AuthGuard = ({ children, requireEmailVerification = true }: AuthGuardProps
       const { data: { session } } = await supabase.auth.getSession();
 
       if (!session) {
-        navigate('/signup', { replace: true });
+        navigate('/login', { replace: true });
         return;
       }
 
@@ -36,7 +36,7 @@ const AuthGuard = ({ children, requireEmailVerification = true }: AuthGuardProps
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       if (event === 'SIGNED_OUT') {
-        navigate('/signup', { replace: true });
+        navigate('/login', { replace: true });
       }
     });
 
