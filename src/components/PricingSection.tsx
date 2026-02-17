@@ -52,86 +52,65 @@ const PricingSection = () => {
 
   const plans = [
     {
-      name: "Trial Gratuito",
-      price: "Grátis",
-      period: "7 dias",
-      description: "Experimente todos os recursos",
-      features: [
-        "Acesso completo por 7 dias",
-        "Todos os exercícios disponíveis", 
-        "Análise de IA ilimitada",
-        "Sistema de gamificação",
-        "Progresso detalhado"
-      ],
-      cta: "Começar Grátis",
-      popular: false,
-      icon: <Zap className="w-5 h-5" />,
-      planType: null, // Trial não tem planType
-      isTrial: true,
-    },
-    {
       name: "Mensal",
       price: "R$ 79,90",
       period: "por mês",
       description: "Flexibilidade total",
       features: [
-        "✅ Acesso completo à plataforma",
-        "✅ Exercícios ilimitados (5, 10 e 15 min)",
-        "✅ Análise de pronúncia por IA",
-        "✅ Biblioteca de vocabulário",
-        "✅ Sistema de gamificação",
-        "✅ Suporte prioritário"
+        "Acesso completo à plataforma",
+        "Exercícios ilimitados (5, 10 e 15 min)",
+        "Análise de pronúncia por IA",
+        "Biblioteca de vocabulário",
+        "Sistema de gamificação",
+        "Suporte prioritário"
       ],
-      cta: "Assinar Mensal",
+      cta: "Começar 7 Dias Grátis",
       popular: false,
       icon: <Star className="w-5 h-5" />,
       planType: 'monthly' as const,
-      isTrial: false,
     },
     {
       name: "Trimestral",
       price: "R$ 59,90",
       period: "por mês",
       originalPrice: "R$ 79,90",
-      savings: "25% de economia",
+      savings: "Economize 25%",
       billingInfo: "R$ 179,70 cobrados a cada 3 meses",
-      description: "Economize R$ 60,00",
+      description: "Mais popular",
       features: [
-        "✅ Tudo do plano mensal",
-        "💰 25% de desconto",
-        "🎁 R$ 60,00 de economia",
-        "📊 Relatórios mensais de progresso",
-        "🎯 Metas personalizadas",
-        "⚡ Acesso prioritário a novos recursos"
+        "Tudo do plano mensal",
+        "25% de desconto",
+        "R$ 60,00 de economia",
+        "Relatórios mensais de progresso",
+        "Metas personalizadas",
+        "Acesso prioritário a novos recursos"
       ],
-      cta: "Assinar Trimestral",
+      cta: "Começar 7 Dias Grátis",
       popular: true,
       icon: <Crown className="w-5 h-5" />,
       planType: 'quarterly' as const,
-      isTrial: false,
     },
     {
       name: "Anual",
       price: "R$ 49,90",
       period: "por mês",
       originalPrice: "R$ 79,90",
-      savings: "38% de economia",
+      savings: "Economize 38%",
       billingInfo: "R$ 598,80 cobrados anualmente",
-      description: "Economize R$ 360,00",
+      description: "Melhor custo-benefício",
       features: [
-        "✅ Tudo do plano mensal",
-        "💰 38% de desconto",
-        "🎁 R$ 360,00 de economia",
-        "🏆 Badge exclusivo de membro anual",
-        "📚 Acesso a materiais premium",
-        "🎓 Certificado de conclusão",
-        "👥 Sessões de mentoria em grupo (mensais)"
+        "Tudo do plano mensal",
+        "38% de desconto",
+        "R$ 360,00 de economia",
+        "Badge exclusivo de membro anual",
+        "Acesso a materiais premium",
+        "Certificado de conclusão",
+        "Sessões de mentoria em grupo"
       ],
-      cta: "Assinar Anual",
+      cta: "Começar 7 Dias Grátis",
       popular: false,
       icon: <Crown className="w-5 h-5" />,
       planType: 'yearly' as const,
-      isTrial: false,
     }
   ];
 
@@ -147,6 +126,12 @@ const PricingSection = () => {
             Comece grátis e evolua no seu ritmo. Sem permanência, 
             cancele quando quiser.
           </p>
+        </div>
+
+        <div className="text-center mb-6">
+          <span className="inline-block bg-primary text-primary-foreground px-5 py-2 rounded-full text-sm font-bold animate-pulse">
+            🎁 7 DIAS GRÁTIS em todos os planos
+          </span>
         </div>
 
         <div className="grid md:grid-cols-3 gap-8">
@@ -232,10 +217,7 @@ const PricingSection = () => {
                   }`}
                   variant={!plan.popular && index !== 0 ? "outline" : "default"}
                   onClick={() => {
-                    if (plan.isTrial) {
-                      // Redirecionar para cadastro/dashboard para trial gratuito
-                      window.location.href = "/onboarding";
-                    } else if (plan.planType) {
+                    if (plan.planType) {
                       handleSubscribe(plan.planType);
                     }
                   }}
