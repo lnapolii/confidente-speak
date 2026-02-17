@@ -272,13 +272,19 @@
     animation: pulseSuccess 2s infinite;
   }
   
-  /* Hover Effects */
+  /* Hover Effects - disabled on touch devices */
   .hover-lift {
     transition: var(--transition-smooth);
   }
   
-  .hover-lift:hover {
-    transform: translateY(-4px);
+  @media (hover: hover) {
+    .hover-lift:hover {
+      transform: translateY(-4px);
+    }
+    .card-elevated:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-lg);
+    }
   }
   
   /* Text Gradients */
@@ -294,6 +300,34 @@
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
+  }
+}
+
+/* Mobile optimizations */
+@media (max-width: 768px) {
+  body {
+    line-height: 1.6;
+    -webkit-text-size-adjust: 100%;
+  }
+  
+  .hero-title {
+    font-size: 28px;
+    line-height: 1.2;
+  }
+  
+  /* Prevent horizontal scroll */
+  html, body {
+    overflow-x: hidden;
+  }
+  
+  /* Touch-friendly targets */
+  button, a, [role="button"] {
+    min-height: 44px;
+  }
+  
+  /* Full-width inputs on mobile */
+  input, select, textarea {
+    font-size: 16px; /* Prevents iOS zoom on focus */
   }
 }
 

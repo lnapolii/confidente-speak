@@ -31,23 +31,37 @@ const Footer = () => {
             <ul className="space-y-2 text-sm">
               <li><a href="#features" className="text-muted-foreground hover:text-foreground transition-colors">Funcionalidades</a></li>
               <li><a href="#pricing" className="text-muted-foreground hover:text-foreground transition-colors">Preços</a></li>
-              <li><a href="#" className="text-muted-foreground hover:text-foreground transition-colors">Como Funciona</a></li>
-              <li><a href="#" className="text-muted-foreground hover:text-foreground transition-colors">FAQ</a></li>
+              <li><a href="#solution" className="text-muted-foreground hover:text-foreground transition-colors">Como Funciona</a></li>
+              <li><a href="#faq" className="text-muted-foreground hover:text-foreground transition-colors">FAQ</a></li>
             </ul>
           </div>
 
-          {/* Empresa */}
+          {/* Legal */}
           <div className="space-y-4">
-            <h4 className="font-heading font-semibold text-foreground">Empresa</h4>
+            <h4 className="font-heading font-semibold text-foreground">Legal</h4>
             <ul className="space-y-2 text-sm">
-              <li><a href="#" className="text-muted-foreground hover:text-foreground transition-colors">Sobre Nós</a></li>
-              <li><a href="#" className="text-muted-foreground hover:text-foreground transition-colors">Blog</a></li>
-              <li><a href="#" className="text-muted-foreground hover:text-foreground transition-colors">Carreiras</a></li>
-              <li><a href="#" className="text-muted-foreground hover:text-foreground transition-colors">Imprensa</a></li>
+              <li>
+                <a href="/terms" className="text-muted-foreground hover:text-foreground transition-colors flex items-center gap-2">
+                  <FileText className="w-4 h-4" />
+                  Termos de Uso
+                </a>
+              </li>
+              <li>
+                <a href="/privacy" className="text-muted-foreground hover:text-foreground transition-colors flex items-center gap-2">
+                  <Shield className="w-4 h-4" />
+                  Política de Privacidade
+                </a>
+              </li>
+              <li>
+                <a href="/cookies" className="text-muted-foreground hover:text-foreground transition-colors flex items-center gap-2">
+                  <FileText className="w-4 h-4" />
+                  Política de Cookies
+                </a>
+              </li>
             </ul>
           </div>
 
-          {/* Legal & Suporte */}
+          {/* Suporte */}
           <div className="space-y-4">
             <h4 className="font-heading font-semibold text-foreground">Suporte</h4>
             <ul className="space-y-2 text-sm">
@@ -61,18 +75,6 @@ const Footer = () => {
                 <a href="#" className="text-muted-foreground hover:text-foreground transition-colors flex items-center gap-2">
                   <MessageCircle className="w-4 h-4" />
                   Chat ao Vivo
-                </a>
-              </li>
-              <li>
-                <a href="#" className="text-muted-foreground hover:text-foreground transition-colors flex items-center gap-2">
-                  <FileText className="w-4 h-4" />
-                  Termos de Uso
-                </a>
-              </li>
-              <li>
-                <a href="#" className="text-muted-foreground hover:text-foreground transition-colors flex items-center gap-2">
-                  <Shield className="w-4 h-4" />
-                  Privacidade
                 </a>
               </li>
             </ul>
