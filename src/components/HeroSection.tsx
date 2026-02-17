@@ -28,8 +28,23 @@ const HeroSection = () => {
             <strong className="text-foreground">Resultados em 7 dias.</strong>
           </p>
 
+          {/* Social proof badge above CTA */}
+          <div className="flex items-center justify-center gap-3 mb-6">
+            <div className="flex -space-x-2">
+              {["MS", "JS", "AC", "RP", "LF", "CM"].map((initials, i) => (
+                <div
+                  key={i}
+                  className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-gradient-primary border-2 border-background flex items-center justify-center text-[10px] md:text-xs font-bold text-primary-foreground"
+                >
+                  {initials}
+                </div>
+              ))}
+            </div>
+            <span className="text-sm font-semibold text-foreground">⚡ 500+ profissionais já praticando</span>
+          </div>
+
           {/* CTA Button - 44px min touch target */}
-          <div className="flex flex-col items-center gap-4 mb-6">
+          <div className="flex flex-col items-center gap-3 mb-6">
             <Button size="lg" className="btn-hero hover-lift px-8 md:px-12 py-6 md:py-8 text-xl md:text-2xl h-auto font-bold shadow-2xl min-h-[44px] w-full sm:w-auto" asChild>
               <a href="/dashboard">
                 🚀 Começar 7 Dias Grátis
@@ -37,23 +52,12 @@ const HeroSection = () => {
             </Button>
             
             <p className="text-sm text-muted-foreground">
-              ✓ Sem cartão • ✓ Cancele quando quiser
+              ✓ Sem cartão de crédito • ✓ Cancele quando quiser
             </p>
           </div>
 
-          {/* Social proof */}
+          {/* Rating & stats */}
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-6 text-sm text-muted-foreground mb-10 md:mb-16">
-            <div className="flex items-center gap-2">
-              <div className="flex -space-x-2">
-                {[1, 2, 3, 4].map((i) => (
-                  <div
-                    key={i}
-                    className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-gradient-primary border-2 border-background"
-                  />
-                ))}
-              </div>
-              <span className="font-semibold">+500 profissionais já praticando</span>
-            </div>
             <div className="flex items-center gap-2">
               <div className="flex gap-0.5">
                 {[1, 2, 3, 4, 5].map((i) => (
@@ -62,6 +66,8 @@ const HeroSection = () => {
               </div>
               <span className="font-semibold">4.9/5.0</span>
             </div>
+            <span className="hidden sm:block text-muted-foreground/40">|</span>
+            <span className="font-semibold">15.000+ exercícios feitos</span>
           </div>
         </div>
 
