@@ -1,7 +1,7 @@
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Eye, EyeOff, CheckCircle2, Loader2 } from 'lucide-react';
+import { Eye, EyeOff, Loader2, Zap } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -13,52 +13,101 @@ import { toast } from 'sonner';
 type FormData = {
   fullName: string;
   email: string;
+  phone: string;
   password: string;
+  confirmPassword: string;
   englishLevel: string;
-  learningGoal: string;
-  preferredTime: string;
+  jobRole: string;
+  howDidYouHear: string;
   acceptedTerms: boolean;
+  acceptedMarketing: boolean;
 };
 
-const STEPS = ['Dados Pessoais', 'Preferências', 'Confirmação'];
+const formatPhone = (value: string): string => {
+  const digits = value.replace(/\D/g, '').slice(0, 11);
+  if (digits.length <= 2) return digits.length ? `(${digits}` : '';
+  if (digits.length <= 7) return `(${digits.slice(0, 2)}) ${digits.slice(2)}`;
+  return `(${digits.slice(0, 2)}) ${digits.slice(2, 7)}-${digits.slice(7)}`;
+};
+
+const getPasswordStrength = (password: string): { label: string; color: string; width: string } => {
+  if (!password) return { label: '', color: '', width: '0%' };
+  let score = 0;
+  if (password.length >= 8) score++;
+  if (password.length >= 12) score++;
+  if (/[A-Z]/.test(password)) score++;
+  if (/[0-9]/.test(password)) score++;
+  if (/[^A-Za-z0-9]/.test(password)) score++;
+
+  if (score <= 2) return { label: 'Fraca', color: 'bg-destructive', width: '33%' };
+  if (score <= 3) return { label: 'Média', color: 'bg-warning', width: '66%' };
+  return { label: 'Forte', color: 'bg-success', width: '100%' };
+};
+
+const isValidPhone = (phone: string) => {
+  const digits = phone.replace(/\D/g, '');
+  return digits.length === 10 || digits.length === 11;
+};
 
 const Signup = () => {
   const navigate = useNavigate();
-  const [step, setStep] = useState(0);
   const [showPassword, setShowPassword] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [touched, setTouched] = useState<Record<string, boolean>>({});
   const [form, setForm] = useState<FormData>({
     fullName: '',
     email: '',
+    phone: '',
     password: '',
+    confirmPassword: '',
     englishLevel: '',
-    learningGoal: '',
-    preferredTime: '',
+    jobRole: '',
+    howDidYouHear: '',
     acceptedTerms: false,
+    acceptedMarketing: false,
   });
 
-  const updateField = (field: keyof FormData, value: string | boolean) => {
+  const updateField = useCallback((field: keyof FormData, value: string | boolean) => {
     setForm(prev => ({ ...prev, [field]: value }));
-  };
+  }, []);
 
-  const isStep1Valid = form.fullName.trim().length >= 2 && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email) && form.password.length >= 8;
-  const isStep2Valid = !!form.englishLevel && !!form.learningGoal && !!form.preferredTime;
-  const isStep3Valid = form.acceptedTerms;
+  const markTouched = useCallback((field: string) => {
+    setTouched(prev => ({ ...prev, [field]: true }));
+  }, []);
 
-  const canProceed = step === 0 ? isStep1Valid : step === 1 ? isStep2Valid : isStep3Valid;
+  // Validations
+  const errors: Partial<Record<keyof FormData, string>> = {};
+  if (form.fullName.trim().length > 0 && form.fullName.trim().length < 3) errors.fullName = 'Mínimo 3 caracteres';
+  if (form.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) errors.email = 'E-mail inválido';
+  if (form.phone && !isValidPhone(form.phone)) errors.phone = 'Formato: (11) 99999-9999';
+  if (form.password && form.password.length < 8) errors.password = 'Mínimo 8 caracteres';
+  if (form.confirmPassword && form.confirmPassword !== form.password) errors.confirmPassword = 'Senhas não conferem';
 
-  const handleSubmit = async () => {
-    if (!canProceed) return;
+  const strength = getPasswordStrength(form.password);
+
+  const isFormValid =
+    form.fullName.trim().length >= 3 &&
+    /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email) &&
+    isValidPhone(form.phone) &&
+    form.password.length >= 8 &&
+    form.confirmPassword === form.password &&
+    !!form.englishLevel &&
+    form.acceptedTerms;
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!isFormValid) return;
     setLoading(true);
 
     try {
       const { data, error } = await supabase.auth.signUp({
-        email: form.email,
+        email: form.email.trim(),
         password: form.password,
         options: {
           emailRedirectTo: window.location.origin,
           data: {
-            full_name: form.fullName,
+            full_name: form.fullName.trim(),
             english_level: form.englishLevel,
           },
         },
@@ -69,11 +118,12 @@ const Signup = () => {
       if (data.user) {
         await supabase.from('users').upsert({
           id: data.user.id,
-          email: form.email,
-          full_name: form.fullName,
+          email: form.email.trim(),
+          full_name: form.fullName.trim(),
           english_level: form.englishLevel,
-          job_role: form.learningGoal,
-          how_did_you_hear: form.preferredTime,
+          phone: form.phone.replace(/\D/g, ''),
+          job_role: form.jobRole.trim() || null,
+          how_did_you_hear: form.howDidYouHear || null,
         });
       }
 
@@ -86,10 +136,11 @@ const Signup = () => {
     }
   };
 
-  const handleNext = () => {
-    if (step < 2) setStep(step + 1);
-    else handleSubmit();
-  };
+  const FieldError = ({ field }: { field: keyof FormData }) => (
+    touched[field] && errors[field] ? (
+      <p className="text-sm text-destructive mt-1">{errors[field]}</p>
+    ) : null
+  );
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background-accent to-background flex items-center justify-center p-4">
@@ -99,192 +150,208 @@ const Signup = () => {
         className="w-full max-w-lg"
       >
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-heading font-bold text-foreground">
-            Crie sua conta <span className="text-primary">ProSpeaker</span>
-          </h1>
-          <p className="text-muted-foreground mt-2">Comece sua jornada de fluência em inglês</p>
-        </div>
-
-        {/* Progress Indicator */}
-        <div className="flex items-center justify-center gap-2 mb-8">
-          {STEPS.map((label, i) => (
-            <div key={label} className="flex items-center gap-2">
-              <div className={`flex items-center justify-center w-8 h-8 rounded-full text-sm font-semibold transition-colors ${
-                i < step ? 'bg-success text-success-foreground' :
-                i === step ? 'bg-primary text-primary-foreground' :
-                'bg-muted text-muted-foreground'
-              }`}>
-                {i < step ? <CheckCircle2 className="w-5 h-5" /> : i + 1}
-              </div>
-              <span className={`text-xs hidden sm:inline ${i === step ? 'text-foreground font-medium' : 'text-muted-foreground'}`}>
-                {label}
-              </span>
-              {i < STEPS.length - 1 && <div className={`w-8 h-0.5 ${i < step ? 'bg-success' : 'bg-border'}`} />}
+          <div className="flex items-center justify-center gap-2 mb-3">
+            <div className="w-8 h-8 bg-gradient-primary rounded-lg flex items-center justify-center">
+              <Zap className="w-5 h-5 text-primary-foreground" />
             </div>
-          ))}
-        </div>
-
-        <div className="bg-card rounded-2xl shadow-lg border border-card-border p-8">
-          <motion.div key={step} initial={{ opacity: 0, x: 15 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.2 }}>
-
-            {/* Step 1: Personal Data */}
-            {step === 0 && (
-              <div className="space-y-5">
-                <div>
-                  <Label htmlFor="fullName" className="mb-1.5 block">Nome Completo</Label>
-                  <Input
-                    id="fullName"
-                    placeholder="Ex: Maria Silva"
-                    value={form.fullName}
-                    onChange={e => updateField('fullName', e.target.value)}
-                    maxLength={100}
-                  />
-                </div>
-
-                <div>
-                  <Label htmlFor="email" className="mb-1.5 block">E-mail</Label>
-                  <Input
-                    id="email"
-                    type="email"
-                    placeholder="seu@email.com"
-                    value={form.email}
-                    onChange={e => updateField('email', e.target.value)}
-                    maxLength={255}
-                  />
-                  {form.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email) && (
-                    <p className="text-sm text-destructive mt-1">E-mail inválido</p>
-                  )}
-                </div>
-
-                <div>
-                  <Label htmlFor="password" className="mb-1.5 block">Senha</Label>
-                  <div className="relative">
-                    <Input
-                      id="password"
-                      type={showPassword ? 'text' : 'password'}
-                      placeholder="Mínimo 8 caracteres"
-                      value={form.password}
-                      onChange={e => updateField('password', e.target.value)}
-                      maxLength={128}
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
-                    >
-                      {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                    </button>
-                  </div>
-                  {form.password && form.password.length < 8 && (
-                    <p className="text-sm text-destructive mt-1">A senha deve ter no mínimo 8 caracteres</p>
-                  )}
-                </div>
-              </div>
-            )}
-
-            {/* Step 2: Preferences */}
-            {step === 1 && (
-              <div className="space-y-5">
-                <div>
-                  <Label className="mb-1.5 block">Nível de Inglês Atual</Label>
-                  <Select value={form.englishLevel} onValueChange={v => updateField('englishLevel', v)}>
-                    <SelectTrigger><SelectValue placeholder="Selecione seu nível" /></SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="beginner">Iniciante — Sei pouco ou nenhum inglês</SelectItem>
-                      <SelectItem value="intermediate">Intermediário — Entendo mas travo ao falar</SelectItem>
-                      <SelectItem value="advanced">Avançado — Falo bem mas quero mais fluência</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div>
-                  <Label className="mb-1.5 block">Objetivo Principal</Label>
-                  <Select value={form.learningGoal} onValueChange={v => updateField('learningGoal', v)}>
-                    <SelectTrigger><SelectValue placeholder="Por que quer aprender?" /></SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="career">Carreira — Reuniões e apresentações</SelectItem>
-                      <SelectItem value="travel">Viagens — Comunicação no exterior</SelectItem>
-                      <SelectItem value="academic">Acadêmico — Estudos e pesquisas</SelectItem>
-                      <SelectItem value="personal">Pessoal — Desenvolvimento próprio</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div>
-                  <Label className="mb-1.5 block">Horário Preferido para Praticar</Label>
-                  <Select value={form.preferredTime} onValueChange={v => updateField('preferredTime', v)}>
-                    <SelectTrigger><SelectValue placeholder="Quando prefere estudar?" /></SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="morning">Manhã — 6h às 12h</SelectItem>
-                      <SelectItem value="afternoon">Tarde — 12h às 18h</SelectItem>
-                      <SelectItem value="evening">Noite — 18h às 23h</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-            )}
-
-            {/* Step 3: Confirmation */}
-            {step === 2 && (
-              <div className="space-y-5">
-                <div className="bg-muted rounded-xl p-5 space-y-3">
-                  <h3 className="font-semibold text-foreground">Resumo do seu perfil</h3>
-                  <div className="grid grid-cols-2 gap-3 text-sm">
-                    <div>
-                      <span className="text-muted-foreground">Nome:</span>
-                      <p className="font-medium text-foreground">{form.fullName}</p>
-                    </div>
-                    <div>
-                      <span className="text-muted-foreground">E-mail:</span>
-                      <p className="font-medium text-foreground">{form.email}</p>
-                    </div>
-                    <div>
-                      <span className="text-muted-foreground">Nível:</span>
-                      <p className="font-medium text-foreground capitalize">{form.englishLevel}</p>
-                    </div>
-                    <div>
-                      <span className="text-muted-foreground">Objetivo:</span>
-                      <p className="font-medium text-foreground capitalize">{form.learningGoal}</p>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="flex items-start gap-3">
-                  <Checkbox
-                    id="terms"
-                    checked={form.acceptedTerms}
-                    onCheckedChange={v => updateField('acceptedTerms', v === true)}
-                  />
-                  <Label htmlFor="terms" className="text-sm leading-relaxed cursor-pointer">
-                    Eu li e aceito os{' '}
-                    <Link to="/terms" className="text-primary underline hover:text-primary/80">Termos de Uso</Link>{' '}
-                    e a{' '}
-                    <Link to="/privacy" className="text-primary underline hover:text-primary/80">Política de Privacidade</Link>.
-                  </Label>
-                </div>
-              </div>
-            )}
-          </motion.div>
-
-          {/* Navigation */}
-          <div className="flex items-center justify-between mt-8">
-            <Button
-              variant="ghost"
-              onClick={() => step > 0 ? setStep(step - 1) : navigate('/')}
-              disabled={loading}
-            >
-              {step === 0 ? 'Voltar ao site' : 'Voltar'}
-            </Button>
-            <Button
-              onClick={handleNext}
-              disabled={!canProceed || loading}
-              className="min-w-[140px]"
-            >
-              {loading ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
-              {step < 2 ? 'Próximo' : 'Criar Conta'}
-            </Button>
+            <span className="text-xl font-heading font-bold text-foreground">
+              Pro<span className="text-primary">Speaker</span>
+            </span>
           </div>
+          <h1 className="text-2xl md:text-3xl font-heading font-bold text-foreground">
+            Crie sua conta gratuita
+          </h1>
+          <p className="text-muted-foreground mt-1 text-sm">7 dias grátis • Sem cartão de crédito</p>
         </div>
+
+        <form onSubmit={handleSubmit} className="bg-card rounded-2xl shadow-lg border border-card-border p-6 md:p-8 space-y-5">
+          {/* Nome */}
+          <div>
+            <Label htmlFor="fullName" className="mb-1.5 block">Nome Completo *</Label>
+            <Input
+              id="fullName"
+              placeholder="Ex: Maria Silva"
+              value={form.fullName}
+              onChange={e => updateField('fullName', e.target.value)}
+              onBlur={() => markTouched('fullName')}
+              maxLength={100}
+              className="min-h-[44px]"
+            />
+            <FieldError field="fullName" />
+          </div>
+
+          {/* Email */}
+          <div>
+            <Label htmlFor="email" className="mb-1.5 block">E-mail *</Label>
+            <Input
+              id="email"
+              type="email"
+              placeholder="seu@email.com"
+              value={form.email}
+              onChange={e => updateField('email', e.target.value)}
+              onBlur={() => markTouched('email')}
+              maxLength={255}
+              className="min-h-[44px]"
+            />
+            <FieldError field="email" />
+          </div>
+
+          {/* Telefone */}
+          <div>
+            <Label htmlFor="phone" className="mb-1.5 block">WhatsApp / Telefone *</Label>
+            <Input
+              id="phone"
+              type="tel"
+              placeholder="(11) 99999-9999"
+              value={form.phone}
+              onChange={e => updateField('phone', formatPhone(e.target.value))}
+              onBlur={() => markTouched('phone')}
+              className="min-h-[44px]"
+            />
+            <FieldError field="phone" />
+          </div>
+
+          {/* Senha */}
+          <div>
+            <Label htmlFor="password" className="mb-1.5 block">Senha *</Label>
+            <div className="relative">
+              <Input
+                id="password"
+                type={showPassword ? 'text' : 'password'}
+                placeholder="Mínimo 8 caracteres"
+                value={form.password}
+                onChange={e => updateField('password', e.target.value)}
+                onBlur={() => markTouched('password')}
+                maxLength={128}
+                className="min-h-[44px] pr-10"
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+              >
+                {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+              </button>
+            </div>
+            <FieldError field="password" />
+            {form.password && (
+              <div className="mt-2 space-y-1">
+                <div className="h-1.5 w-full bg-muted rounded-full overflow-hidden">
+                  <div className={`h-full ${strength.color} transition-all duration-300 rounded-full`} style={{ width: strength.width }} />
+                </div>
+                <p className="text-xs text-muted-foreground">Força: <span className="font-medium">{strength.label}</span></p>
+              </div>
+            )}
+          </div>
+
+          {/* Confirmar Senha */}
+          <div>
+            <Label htmlFor="confirmPassword" className="mb-1.5 block">Confirmar Senha *</Label>
+            <div className="relative">
+              <Input
+                id="confirmPassword"
+                type={showConfirm ? 'text' : 'password'}
+                placeholder="Repita a senha"
+                value={form.confirmPassword}
+                onChange={e => updateField('confirmPassword', e.target.value)}
+                onBlur={() => markTouched('confirmPassword')}
+                maxLength={128}
+                className="min-h-[44px] pr-10"
+              />
+              <button
+                type="button"
+                onClick={() => setShowConfirm(!showConfirm)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+              >
+                {showConfirm ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+              </button>
+            </div>
+            <FieldError field="confirmPassword" />
+          </div>
+
+          {/* Nível de inglês */}
+          <div>
+            <Label className="mb-1.5 block">Seu nível de inglês *</Label>
+            <Select value={form.englishLevel} onValueChange={v => updateField('englishLevel', v)}>
+              <SelectTrigger className="min-h-[44px]"><SelectValue placeholder="Selecione seu nível" /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="basic">Básico — Entendo pouco</SelectItem>
+                <SelectItem value="intermediate">Intermediário — Entendo bem, trava ao falar</SelectItem>
+                <SelectItem value="advanced">Avançado — Só preciso de confiança</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          {/* Cargo */}
+          <div>
+            <Label htmlFor="jobRole" className="mb-1.5 block">Cargo ou Área <span className="text-muted-foreground text-xs">(opcional)</span></Label>
+            <Input
+              id="jobRole"
+              placeholder="Ex: Desenvolvedor, Product Manager, Analista..."
+              value={form.jobRole}
+              onChange={e => updateField('jobRole', e.target.value)}
+              maxLength={100}
+              className="min-h-[44px]"
+            />
+          </div>
+
+          {/* Como conheceu */}
+          <div>
+            <Label className="mb-1.5 block">Como conheceu o ProSpeaker? <span className="text-muted-foreground text-xs">(opcional)</span></Label>
+            <Select value={form.howDidYouHear} onValueChange={v => updateField('howDidYouHear', v)}>
+              <SelectTrigger className="min-h-[44px]"><SelectValue placeholder="Selecione uma opção" /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="google">Google</SelectItem>
+                <SelectItem value="instagram">Instagram</SelectItem>
+                <SelectItem value="linkedin">LinkedIn</SelectItem>
+                <SelectItem value="friend">Indicação de amigo</SelectItem>
+                <SelectItem value="other">Outro</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          {/* Termos */}
+          <div className="space-y-3 pt-2">
+            <div className="flex items-start gap-3">
+              <Checkbox
+                id="terms"
+                checked={form.acceptedTerms}
+                onCheckedChange={v => updateField('acceptedTerms', v === true)}
+              />
+              <Label htmlFor="terms" className="text-sm leading-relaxed cursor-pointer">
+                Aceito os{' '}
+                <Link to="/terms" className="text-primary underline hover:text-primary/80">Termos de Uso</Link>{' '}
+                e a{' '}
+                <Link to="/privacy" className="text-primary underline hover:text-primary/80">Política de Privacidade</Link> *
+              </Label>
+            </div>
+
+            <div className="flex items-start gap-3">
+              <Checkbox
+                id="marketing"
+                checked={form.acceptedMarketing}
+                onCheckedChange={v => updateField('acceptedMarketing', v === true)}
+              />
+              <Label htmlFor="marketing" className="text-sm leading-relaxed cursor-pointer text-muted-foreground">
+                Quero receber dicas e conteúdos por email
+              </Label>
+            </div>
+          </div>
+
+          {/* Submit */}
+          <Button
+            type="submit"
+            disabled={!isFormValid || loading}
+            className="w-full btn-hero min-h-[48px] text-lg font-bold"
+          >
+            {loading ? <Loader2 className="w-5 h-5 animate-spin mr-2" /> : null}
+            🚀 Começar 7 Dias Grátis
+          </Button>
+
+          <p className="text-center text-xs text-muted-foreground">
+            ✓ Sem cartão de crédito • ✓ Cancele quando quiser
+          </p>
+        </form>
 
         <p className="text-center text-sm text-muted-foreground mt-6">
           Já tem uma conta?{' '}
