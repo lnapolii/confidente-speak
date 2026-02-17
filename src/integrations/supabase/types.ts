@@ -14,6 +14,45 @@ export type Database = {
   }
   public: {
     Tables: {
+      saved_items: {
+        Row: {
+          category: string | null
+          created_at: string
+          description: string | null
+          id: string
+          item_id: string
+          item_type: string
+          level: string | null
+          thumbnail_url: string | null
+          title: string
+          user_id: string
+        }
+        Insert: {
+          category?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          item_id: string
+          item_type: string
+          level?: string | null
+          thumbnail_url?: string | null
+          title: string
+          user_id: string
+        }
+        Update: {
+          category?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          item_id?: string
+          item_type?: string
+          level?: string | null
+          thumbnail_url?: string | null
+          title?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       users: {
         Row: {
           cancel_at_period_end: boolean | null
