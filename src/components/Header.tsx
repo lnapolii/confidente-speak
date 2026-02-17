@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button";
-import { Medal, Zap, Users, BookOpen } from "lucide-react";
+import { Zap } from "lucide-react";
+import MobileNav from "@/components/MobileNav";
 
 const Header = () => {
   return (
@@ -33,12 +34,13 @@ const Header = () => {
           <Button variant="ghost" className="hidden md:inline-flex" asChild>
             <a href="/dashboard">Login</a>
           </Button>
-          <Button className="btn-hero hover-lift" asChild>
+          <Button className="btn-hero hover-lift hidden md:inline-flex" asChild>
             <a href="/dashboard">
               <Zap className="w-4 h-4 mr-2" />
               Começar 7 Dias Grátis
             </a>
           </Button>
+          <MobileNav />
         </div>
       </div>
     </header>
