@@ -12,7 +12,8 @@ import {
   Play, 
   Clock,
   Star,
-  Award
+  Award,
+  Bookmark
 } from "lucide-react";
 
 // Mock data for progress chart
@@ -44,6 +45,12 @@ const Dashboard = () => {
               <Star className="w-4 h-4" />
               1,247 XP
             </div>
+            <Button variant="ghost" size="sm" asChild>
+              <a href="/library">
+                <Bookmark className="w-4 h-4 mr-1" />
+                Biblioteca
+              </a>
+            </Button>
             <Button variant="ghost" size="sm" asChild>
               <a href="/profile">Perfil</a>
             </Button>
