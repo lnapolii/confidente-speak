@@ -8,7 +8,7 @@ const corsHeaders = {
 const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY");
 
 interface EmailRequest {
-  type: 'welcome' | 'daily_reminder' | 'progress_report' | 'payment_confirmation' | 'password_reset' | 'email_confirmation';
+  type: 'welcome' | 'daily_reminder' | 'progress_report' | 'payment_confirmation' | 'password_reset' | 'email_confirmation' | 'trial_reminder';
   to: string;
   data?: Record<string, any>;
 }
@@ -129,6 +129,65 @@ const templates: Record<string, (data: any) => { subject: string; html: string }
             </a>
           </div>
           <p style="color: #94a3b8; font-size: 14px;">Este link expira em 1 hora. Se você não solicitou esta alteração, ignore este email.</p>
+        </div>
+      </div>
+    `,
+  }),
+
+  trial_reminder: (data) => ({
+    subject: "⏰ Seu trial termina em 2 dias - ProSpeaker",
+    html: `
+      <div style="font-family: 'Inter', Arial, sans-serif; max-width: 600px; margin: 0 auto; background: #f8fafc; padding: 40px 20px;">
+        <div style="background: white; border-radius: 16px; padding: 40px; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
+          <div style="text-align: center; margin-bottom: 32px;">
+            <h1 style="color: #2563EB; font-size: 28px; margin: 0;">Pro<span style="color: #1e293b;">Speaker</span></h1>
+          </div>
+
+          <div style="background: linear-gradient(135deg, #fef3c7, #fde68a); border-radius: 12px; padding: 20px; text-align: center; margin-bottom: 28px;">
+            <div style="font-size: 48px; margin-bottom: 8px;">⏰</div>
+            <p style="margin: 0; font-size: 18px; font-weight: 700; color: #92400e;">Apenas 2 dias restantes!</p>
+          </div>
+
+          <h2 style="color: #1e293b; font-size: 22px; text-align: center; margin-bottom: 16px;">
+            Olá, ${data.name || 'Aluno'}! Seu trial encerra em breve.
+          </h2>
+
+          <p style="color: #64748b; font-size: 16px; line-height: 1.7; text-align: center;">
+            Você tem <strong style="color: #d97706;">2 dias</strong> restantes do seu trial gratuito no ProSpeaker.<br/>
+            Após esse período, sua assinatura <strong>${data.planType || 'mensal'}</strong> será ativada automaticamente.
+          </p>
+
+          <div style="background: #f0fdf4; border-radius: 12px; padding: 20px; margin: 24px 0;">
+            <h3 style="color: #065f46; margin: 0 0 12px 0; font-size: 16px;">🎯 Seu progresso até agora:</h3>
+            <ul style="margin: 0; padding: 0 0 0 20px; color: #64748b; line-height: 2;">
+              <li>✅ Conta criada e configurada</li>
+              <li>📚 Acesso a todos os exercícios</li>
+              <li>🎤 Análise de pronúncia por IA</li>
+            </ul>
+          </div>
+
+          <p style="color: #64748b; font-size: 15px; text-align: center;">
+            Continue praticando e consolide seu inglês para o ambiente profissional!
+          </p>
+
+          <div style="text-align: center; margin: 32px 0;">
+            <a href="${data.appUrl || 'https://prospeaker.com.br'}/dashboard"
+               style="background: linear-gradient(135deg, #2563EB, #3b82f6); color: white; padding: 16px 48px; border-radius: 12px; text-decoration: none; font-weight: 700; font-size: 17px; display: inline-block; box-shadow: 0 4px 12px rgba(37,99,235,0.3);">
+              Continuar Praticando 🚀
+            </a>
+          </div>
+
+          <div style="background: #f8fafc; border-radius: 8px; padding: 16px; margin-top: 24px;">
+            <p style="margin: 0; color: #94a3b8; font-size: 13px; text-align: center;">
+              Quer cancelar antes do fim do trial? Acesse <a href="${data.appUrl || 'https://prospeaker.com.br'}/dashboard" style="color: #2563EB;">suas configurações</a> a qualquer momento.<br/>
+              Sem cobranças, sem complicações. ❤️
+            </p>
+          </div>
+
+          <hr style="border: none; border-top: 1px solid #e2e8f0; margin: 24px 0;" />
+          <p style="color: #94a3b8; font-size: 12px; text-align: center;">
+            ProSpeaker — Build your confidence. Develop your English. Unlock your life.
+          </p>
         </div>
       </div>
     `,
