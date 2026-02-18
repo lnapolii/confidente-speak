@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Check, Zap, Crown, Star } from "lucide-react";
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
-import { createCheckoutSession, STRIPE_PRICE_IDS } from "@/services/stripeService";
+import { createCheckoutSession } from "@/services/stripeService";
 import { supabase } from "@/integrations/supabase/client";
 
 const PricingSection = () => {
@@ -28,14 +28,8 @@ const PricingSection = () => {
         return;
       }
 
-      // Obter o price ID correto
-      const priceId = STRIPE_PRICE_IDS[planType];
-
-      // Criar sessão de checkout
-      await createCheckoutSession({
-        priceId,
-        planType,
-      });
+      // Criar sessão de checkout (price ID gerenciado no backend via secrets)
+      await createCheckoutSession({ planType });
 
       // O redirecionamento acontece automaticamente dentro de createCheckoutSession
     } catch (error) {
