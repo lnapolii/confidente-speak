@@ -291,7 +291,7 @@ async function handleTrialWillEnd(subscription: any, supabase: any) {
 
   const { data: user } = await supabase
     .from('users')
-    .select('id, email, full_name')
+    .select('id, email, full_name, plan_type')
     .eq('stripe_subscription_id', subscription.id)
     .single();
 
@@ -300,8 +300,47 @@ async function handleTrialWillEnd(subscription: any, supabase: any) {
     return;
   }
 
-  console.log('ℹ️ User trial ending in 3 days:', user.email);
+  console.log('📧 Sending trial reminder to:', user.email);
 
-  // TODO: Enviar email de trial terminando
-  // await sendTrialEndingEmail(user);
+  const planLabels: Record<string, string> = {
+    monthly: 'Mensal (R$ 79,90/mês)',
+    quarterly: 'Trimestral (R$ 59,90/mês)',
+    yearly: 'Anual (R$ 49,90/mês)',
+  };
+
+  const planLabel = planLabels[user.plan_type || 'monthly'] || 'Mensal';
+  const APP_URL = Deno.env.get('DOMAIN') || 'https://prospeaker.com.br';
+  const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
+  const SUPABASE_ANON_KEY = Deno.env.get('SUPABASE_ANON_KEY')!;
+
+  try {
+    const res = await fetch(`${SUPABASE_URL}/functions/v1/send-email`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+      },
+      body: JSON.stringify({
+        type: 'trial_reminder',
+        to: user.email,
+        data: {
+          name: user.full_name || user.email.split('@')[0],
+          planType: planLabel,
+          trialEndsAt: subscription.trial_end
+            ? new Date(subscription.trial_end * 1000).toISOString()
+            : null,
+          appUrl: APP_URL,
+        },
+      }),
+    });
+
+    if (res.ok) {
+      console.log('✅ Trial reminder email sent to:', user.email);
+    } else {
+      const err = await res.json();
+      console.error('❌ Failed to send trial reminder:', err);
+    }
+  } catch (err) {
+    console.error('❌ Exception sending trial reminder:', err);
+  }
 }
