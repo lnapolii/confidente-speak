@@ -249,8 +249,85 @@ async function handlePaymentSucceeded(invoice: any, supabase: any) {
     console.log('✅ Payment recorded successfully');
   }
 
-  // TODO: Enviar recibo por email
-  // await sendReceiptEmail(invoice);
+  // NFe.io - Emissão de nota fiscal (somente se as credenciais estiverem configuradas)
+  const nfeioApiKey = Deno.env.get('NFEIO_API_KEY');
+  const nfeioCompanyId = Deno.env.get('NFEIO_COMPANY_ID');
+
+  if (nfeioApiKey && nfeioCompanyId) {
+    console.log('🧾 NFe.io credentials found — attempting invoice issuance...');
+    try {
+      await issueNFeio({ invoice, user, nfeioApiKey, nfeioCompanyId, supabase });
+    } catch (err) {
+      console.error('❌ NFe.io invoice error (non-blocking):', err);
+    }
+  } else {
+    console.log('ℹ️ NFe.io not configured (NFEIO_API_KEY / NFEIO_COMPANY_ID missing) — skipping invoice issuance.');
+  }
+}
+
+// =====================================================================
+// NFe.io - Emissão de NFS-e (desativado até NFEIO_API_KEY ser definido)
+// =====================================================================
+
+async function issueNFeio({ invoice, user, nfeioApiKey, nfeioCompanyId, supabase }: {
+  invoice: any;
+  user: any;
+  nfeioApiKey: string;
+  nfeioCompanyId: string;
+  supabase: any;
+}) {
+  const amountBRL = invoice.amount_paid / 100;
+
+  // Buscar dados completos do usuário
+  const { data: fullUser } = await supabase
+    .from('users')
+    .select('email, full_name')
+    .eq('id', user.id)
+    .single();
+
+  const payload = {
+    cityServiceCode: '1.01', // Código de serviço genérico — ajustar conforme município
+    description: 'Serviço de plataforma de aprendizado de inglês',
+    servicesAmount: amountBRL,
+    borrower: {
+      type: 'NaturalPerson',
+      name: fullUser?.full_name || 'Cliente ProSpeaker',
+      email: fullUser?.email || '',
+    },
+  };
+
+  const res = await fetch(
+    `https://api.nfe.io/v1/companies/${nfeioCompanyId}/serviceinvoices`,
+    {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: nfeioApiKey,
+      },
+      body: JSON.stringify(payload),
+    }
+  );
+
+  if (!res.ok) {
+    const errBody = await res.text();
+    throw new Error(`NFe.io API error ${res.status}: ${errBody}`);
+  }
+
+  const nfeData = await res.json();
+  const invoiceRef = nfeData.id || nfeData.reference || null;
+  console.log('✅ NFe.io invoice issued:', invoiceRef);
+
+  // Salvar referência da NF no banco (campo nfe_reference — adicionar à tabela se necessário)
+  if (invoiceRef) {
+    await supabase
+      .from('users')
+      .update({ updated_at: new Date().toISOString() })
+      .eq('id', user.id);
+    // TODO: salvar invoiceRef em tabela dedicada de invoices quando criada
+  }
+
+  // TODO: Enviar PDF por email via send-email function quando template estiver pronto
+  // await sendInvoiceEmail({ userEmail: fullUser?.email, invoiceRef, nfeData });
 }
 
 async function handlePaymentFailed(invoice: any, supabase: any) {
