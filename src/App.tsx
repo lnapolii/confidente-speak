@@ -29,6 +29,7 @@ const VerifyEmail = lazy(() => import("./pages/VerifyEmail"));
 const Login = lazy(() => import("./pages/Login"));
 const ForgotPassword = lazy(() => import("./pages/ForgotPassword"));
 const ResetPassword = lazy(() => import("./pages/ResetPassword"));
+const Subscription = lazy(() => import("./pages/Subscription"));
 
 const queryClient = new QueryClient();
 
@@ -88,6 +89,7 @@ const App = () => {
               <Route path="/profile" element={<AuthGuard><Profile /></AuthGuard>} />
               <Route path="/library" element={<AuthGuard><Library /></AuthGuard>} />
               <Route path="/email-preferences" element={<AuthGuard><EmailPreferences /></AuthGuard>} />
+              <Route path="/dashboard/assinatura" element={<AuthGuard><Subscription /></AuthGuard>} />
 
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
