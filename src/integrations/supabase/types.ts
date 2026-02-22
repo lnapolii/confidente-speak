@@ -14,6 +14,93 @@ export type Database = {
   }
   public: {
     Tables: {
+      achievements: {
+        Row: {
+          achievement_code: string
+          achievement_name: string | null
+          id: string
+          unlocked_at: string | null
+          user_id: string
+        }
+        Insert: {
+          achievement_code: string
+          achievement_name?: string | null
+          id?: string
+          unlocked_at?: string | null
+          user_id: string
+        }
+        Update: {
+          achievement_code?: string
+          achievement_name?: string | null
+          id?: string
+          unlocked_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      exercises_completed: {
+        Row: {
+          clarity_score: number | null
+          completed_at: string | null
+          created_at: string | null
+          duration: number | null
+          exercise_id: string
+          exercise_title: string | null
+          fluency_score: number | null
+          id: string
+          listen_count: number | null
+          listening_completed: boolean | null
+          overall_score: number | null
+          pronunciation_score: number | null
+          reading_completed: boolean | null
+          recording_url: string | null
+          speaking_completed: boolean | null
+          user_id: string
+          words_consulted: number | null
+          xp_earned: number | null
+        }
+        Insert: {
+          clarity_score?: number | null
+          completed_at?: string | null
+          created_at?: string | null
+          duration?: number | null
+          exercise_id: string
+          exercise_title?: string | null
+          fluency_score?: number | null
+          id?: string
+          listen_count?: number | null
+          listening_completed?: boolean | null
+          overall_score?: number | null
+          pronunciation_score?: number | null
+          reading_completed?: boolean | null
+          recording_url?: string | null
+          speaking_completed?: boolean | null
+          user_id: string
+          words_consulted?: number | null
+          xp_earned?: number | null
+        }
+        Update: {
+          clarity_score?: number | null
+          completed_at?: string | null
+          created_at?: string | null
+          duration?: number | null
+          exercise_id?: string
+          exercise_title?: string | null
+          fluency_score?: number | null
+          id?: string
+          listen_count?: number | null
+          listening_completed?: boolean | null
+          overall_score?: number | null
+          pronunciation_score?: number | null
+          reading_completed?: boolean | null
+          recording_url?: string | null
+          speaking_completed?: boolean | null
+          user_id?: string
+          words_consulted?: number | null
+          xp_earned?: number | null
+        }
+        Relationships: []
+      }
       saved_items: {
         Row: {
           category: string | null
@@ -50,6 +137,45 @@ export type Database = {
           thumbnail_url?: string | null
           title?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      user_stats: {
+        Row: {
+          current_level: number | null
+          current_streak: number | null
+          last_practice_date: string | null
+          longest_streak: number | null
+          total_exercises: number | null
+          total_words_learned: number | null
+          total_xp: number | null
+          updated_at: string | null
+          user_id: string
+          xp_to_next_level: number | null
+        }
+        Insert: {
+          current_level?: number | null
+          current_streak?: number | null
+          last_practice_date?: string | null
+          longest_streak?: number | null
+          total_exercises?: number | null
+          total_words_learned?: number | null
+          total_xp?: number | null
+          updated_at?: string | null
+          user_id: string
+          xp_to_next_level?: number | null
+        }
+        Update: {
+          current_level?: number | null
+          current_streak?: number | null
+          last_practice_date?: string | null
+          longest_streak?: number | null
+          total_exercises?: number | null
+          total_words_learned?: number | null
+          total_xp?: number | null
+          updated_at?: string | null
+          user_id?: string
+          xp_to_next_level?: number | null
         }
         Relationships: []
       }
@@ -131,6 +257,63 @@ export type Database = {
           subscription_status?: string | null
           trial_ends_at?: string | null
           updated_at?: string | null
+        }
+        Relationships: []
+      }
+      vocabulary: {
+        Row: {
+          alternatives: Json | null
+          context_sentence: string | null
+          created_at: string | null
+          examples: Json | null
+          exercise_id: string | null
+          id: string
+          is_favorite: boolean | null
+          last_reviewed_at: string | null
+          lookup_count: number | null
+          next_review_at: string | null
+          phonetic: string | null
+          review_count: number | null
+          translation: string
+          updated_at: string | null
+          user_id: string
+          word: string
+        }
+        Insert: {
+          alternatives?: Json | null
+          context_sentence?: string | null
+          created_at?: string | null
+          examples?: Json | null
+          exercise_id?: string | null
+          id?: string
+          is_favorite?: boolean | null
+          last_reviewed_at?: string | null
+          lookup_count?: number | null
+          next_review_at?: string | null
+          phonetic?: string | null
+          review_count?: number | null
+          translation: string
+          updated_at?: string | null
+          user_id: string
+          word: string
+        }
+        Update: {
+          alternatives?: Json | null
+          context_sentence?: string | null
+          created_at?: string | null
+          examples?: Json | null
+          exercise_id?: string | null
+          id?: string
+          is_favorite?: boolean | null
+          last_reviewed_at?: string | null
+          lookup_count?: number | null
+          next_review_at?: string | null
+          phonetic?: string | null
+          review_count?: number | null
+          translation?: string
+          updated_at?: string | null
+          user_id?: string
+          word?: string
         }
         Relationships: []
       }
