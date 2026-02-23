@@ -1,47 +1,14 @@
 import { useState, useEffect, useMemo } from 'react';
-import exercisesData from '@/data/exercises.json';
+import { EXERCISES_LIBRARY } from '@/data/exercisesLibrary';
+import type { Exercise, ExerciseCategory } from '@/types/exercises';
+import { CATEGORIES } from '@/types/exercises';
 
-export type ExerciseDuration = 5 | 10 | 15;
-
-export type ExerciseLevel = 'básico' | 'intermediário' | 'avançado';
-
-export type ExerciseCategory = 
-  | 'Reuniões' 
-  | 'Apresentações' 
-  | 'Comunicação Diária' 
-  | 'Negociações' 
-  | 'Networking';
-
-export interface ExerciseDurationContent {
-  text: string;
-  keywords: string[];
-  focusPoints: string[];
-  culturalTips?: string[];
-}
-
-export interface Exercise {
-  id: string;
-  category: ExerciseCategory;
-  title: string;
-  description: string;
-  level: ExerciseLevel;
-  tags: string[];
-  duration: {
-    5: ExerciseDurationContent;
-    10: ExerciseDurationContent;
-    15: ExerciseDurationContent;
-  };
-  audioGenerated: boolean;
-  estimatedTime: {
-    5: number;
-    10: number;
-    15: number;
-  };
-}
+export type { Exercise, ExerciseCategory };
+export type ExerciseDifficulty = 'beginner' | 'intermediate' | 'advanced';
 
 interface UseExercisesOptions {
   category?: ExerciseCategory;
-  level?: ExerciseLevel;
+  difficulty?: ExerciseDifficulty;
   searchTerm?: string;
 }
 
@@ -50,10 +17,9 @@ export const useExercises = (options?: UseExercisesOptions) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Simular carregamento
     setLoading(true);
     setTimeout(() => {
-      setExercises(exercisesData as Exercise[]);
+      setExercises(EXERCISES_LIBRARY);
       setLoading(false);
     }, 300);
   }, []);
@@ -65,13 +31,13 @@ export const useExercises = (options?: UseExercisesOptions) => {
       filtered = filtered.filter(ex => ex.category === options.category);
     }
 
-    if (options?.level) {
-      filtered = filtered.filter(ex => ex.level === options.level);
+    if (options?.difficulty) {
+      filtered = filtered.filter(ex => ex.difficulty === options.difficulty);
     }
 
     if (options?.searchTerm) {
       const term = options.searchTerm.toLowerCase();
-      filtered = filtered.filter(ex => 
+      filtered = filtered.filter(ex =>
         ex.title.toLowerCase().includes(term) ||
         ex.description.toLowerCase().includes(term) ||
         ex.tags.some(tag => tag.toLowerCase().includes(term))
@@ -89,27 +55,20 @@ export const useExercises = (options?: UseExercisesOptions) => {
     return exercises.filter(ex => ex.category === category);
   };
 
-  const getRecommendedExercise = (userLevel?: ExerciseLevel): Exercise | undefined => {
-    // Lógica simples de recomendação
-    const levelExercises = userLevel 
-      ? exercises.filter(ex => ex.level === userLevel)
+  const getRecommendedExercise = (difficulty?: ExerciseDifficulty): Exercise | undefined => {
+    const filtered = difficulty
+      ? exercises.filter(ex => ex.difficulty === difficulty)
       : exercises;
-
-    // Retorna um exercício aleatório do nível apropriado
-    return levelExercises[Math.floor(Math.random() * levelExercises.length)];
+    return filtered[Math.floor(Math.random() * filtered.length)];
   };
 
-  const categories: ExerciseCategory[] = [
-    'Reuniões',
-    'Apresentações',
-    'Comunicação Diária',
-    'Negociações',
-    'Networking'
-  ];
+  const categories = Object.keys(CATEGORIES) as ExerciseCategory[];
 
   const getCategoryCount = (category: ExerciseCategory): number => {
     return exercises.filter(ex => ex.category === category).length;
   };
+
+  const getCategoryInfo = (category: ExerciseCategory) => CATEGORIES[category];
 
   return {
     exercises: filteredExercises,
@@ -120,6 +79,7 @@ export const useExercises = (options?: UseExercisesOptions) => {
     getRecommendedExercise,
     categories,
     getCategoryCount,
-    totalCount: exercises.length
+    getCategoryInfo,
+    totalCount: exercises.length,
   };
 };
