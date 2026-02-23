@@ -4,13 +4,17 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Target, Volume2, X, Loader2 } from "lucide-react";
 import { translateWordWithCache, type TranslationResult } from "@/services/translationService";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 interface ReadingExerciseProps {
   text: string;
+  exerciseId?: string;
+  exerciseTitle?: string;
   onComplete: () => void;
 }
 
-const ReadingExercise = ({ text, onComplete }: ReadingExerciseProps) => {
+const ReadingExercise = ({ text, exerciseId, exerciseTitle, onComplete }: ReadingExerciseProps) => {
   const [consultedWords, setConsultedWords] = useState<Set<string>>(new Set());
   const [activeWord, setActiveWord] = useState<{ word: string; original: string } | null>(null);
   const [translation, setTranslation] = useState<TranslationResult | null>(null);
@@ -77,6 +81,42 @@ const ReadingExercise = ({ text, onComplete }: ReadingExerciseProps) => {
       const translationData = await translateWordWithCache(cleanWord, text);
       setTranslation(translationData);
       setConsultedWords(prev => new Set([...prev, cleanWord]));
+
+      // Salvar palavra na biblioteca de vocabulário
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session?.user?.id) {
+        const { error: upsertError } = await supabase
+          .from('vocabulary')
+          .upsert(
+            {
+              user_id: session.user.id,
+              word: cleanWord,
+              translation: translationData.primary,
+              phonetic: translationData.phonetic || null,
+              context_sentence: text.substring(0, 500),
+              exercise_id: exerciseId || null,
+              alternatives: translationData.alternatives || [],
+              examples: translationData.example
+                ? [{ sentence: translationData.example, tip: translationData.tip }]
+                : [],
+            },
+            { onConflict: 'user_id,word', ignoreDuplicates: false }
+          );
+
+        if (upsertError) {
+          // Word may already exist — increment lookup count
+          if (upsertError.code === '23505') {
+            await supabase.rpc('increment_lookup_count', {
+              p_user_id: session.user.id,
+              p_word: cleanWord,
+            });
+          } else {
+            console.warn('Vocabulary save error:', upsertError);
+          }
+        }
+
+        toast.success('📚 Palavra salva na biblioteca!', { duration: 2000 });
+      }
     } catch (error) {
       console.error('Erro ao traduzir palavra:', error);
       setTranslation({
