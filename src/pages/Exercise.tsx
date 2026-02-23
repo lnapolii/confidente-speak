@@ -353,6 +353,8 @@ const Exercise = () => {
           {currentStep === 1 && (
             <ReadingExercise 
               text={exerciseText}
+              exerciseId={exerciseTopic}
+              exerciseTitle="Team Meeting Discussion"
               onComplete={() => setCurrentStep(2)}
             />
           )}

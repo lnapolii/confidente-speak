@@ -322,7 +322,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      increment_lookup_count: {
+        Args: { p_user_id: string; p_word: string }
+        Returns: undefined
+      }
     }
     Enums: {
       [_ in never]: never
