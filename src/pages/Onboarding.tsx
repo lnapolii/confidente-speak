@@ -1,68 +1,110 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from '@/hooks/use-toast';
 import WelcomeScreen from '@/components/onboarding/WelcomeScreen';
-import AssessmentScreen from '@/components/onboarding/AssessmentScreen';
-import GoalScreen from '@/components/onboarding/GoalScreen';
-import TourScreen from '@/components/onboarding/TourScreen';
+import ObjectiveScreen from '@/components/onboarding/ObjectiveScreen';
+import OnboardingLevelScreen from '@/components/onboarding/OnboardingLevelScreen';
+import DailyGoalScreen from '@/components/onboarding/DailyGoalScreen';
+import ConfirmationScreen from '@/components/onboarding/ConfirmationScreen';
 
-export type OnboardingData = {
-  level?: 'basic' | 'intermediate' | 'advanced';
-  difficulty?: 'vocabulary' | 'pronunciation' | 'thinking' | 'confidence';
-  time?: 5 | 10 | 15;
-  weeklyGoal?: number;
-  reminderTime?: string;
-  enableReminders?: boolean;
-};
+const TOTAL_STEPS = 5;
 
 const Onboarding = () => {
   const navigate = useNavigate();
-  const [currentStep, setCurrentStep] = useState(0);
-  const [data, setData] = useState<OnboardingData>({});
+  const [step, setStep] = useState(0);
+  const [saving, setSaving] = useState(false);
+  const [userName, setUserName] = useState('');
 
-  const totalSteps = 4;
-  const progress = ((currentStep + 1) / totalSteps) * 100;
+  // Collected data
+  const [objective, setObjective] = useState('');
+  const [level, setLevel] = useState('');
+  const [dailyGoal, setDailyGoal] = useState<number>(0);
 
-  const handleNext = (stepData: Partial<OnboardingData>) => {
-    const updated = { ...data, ...stepData };
-    setData(updated);
+  useEffect(() => {
+    const loadUser = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+      const { data } = await supabase
+        .from('users')
+        .select('full_name, onboarding_completed')
+        .eq('id', user.id)
+        .single();
+      if (data?.onboarding_completed) {
+        navigate('/dashboard', { replace: true });
+        return;
+      }
+      setUserName(data?.full_name || user.user_metadata?.full_name || '');
+    };
+    loadUser();
+  }, [navigate]);
 
-    if (currentStep < totalSteps - 1) {
-      setCurrentStep(currentStep + 1);
-    } else {
-      localStorage.setItem('onboardingData', JSON.stringify(updated));
+  const saveOnboarding = async () => {
+    setSaving(true);
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('Not authenticated');
+
+      const { error } = await supabase
+        .from('users')
+        .update({
+          objective,
+          english_level: level,
+          daily_goal_minutes: dailyGoal,
+          onboarding_completed: true,
+        })
+        .eq('id', user.id);
+
+      if (error) throw error;
+
       localStorage.setItem('onboardingCompleted', 'true');
       navigate('/dashboard?firstTime=true');
+    } catch (err: any) {
+      toast({ title: 'Erro ao salvar', description: err.message, variant: 'destructive' });
+    } finally {
+      setSaving(false);
     }
   };
 
-  const handleBack = () => {
-    if (currentStep > 0) setCurrentStep(currentStep - 1);
-  };
-
-  const handleSkip = () => {
-    const defaultData: OnboardingData = {
-      level: 'intermediate',
-      difficulty: 'confidence',
-      time: 5,
-      weeklyGoal: 5,
-      enableReminders: false,
-    };
-    localStorage.setItem('onboardingData', JSON.stringify(defaultData));
-    localStorage.setItem('onboardingCompleted', 'true');
-    navigate('/dashboard');
-  };
+  const progress = ((step + 1) / TOTAL_STEPS) * 100;
 
   const screens = [
-    <WelcomeScreen key="welcome" onNext={() => handleNext({})} />,
-    <AssessmentScreen key="assessment" onNext={handleNext} onBack={handleBack} />,
-    <GoalScreen key="goal" onNext={handleNext} onBack={handleBack} />,
-    <TourScreen key="tour" onNext={() => handleNext({})} onBack={handleBack} />,
+    <WelcomeScreen key="welcome" onNext={() => setStep(1)} />,
+    <ObjectiveScreen
+      key="objective"
+      initialValue={objective}
+      onNext={(v) => { setObjective(v); setStep(2); }}
+      onBack={() => setStep(0)}
+    />,
+    <OnboardingLevelScreen
+      key="level"
+      initialValue={level}
+      onNext={(v) => { setLevel(v); setStep(3); }}
+      onBack={() => setStep(1)}
+    />,
+    <DailyGoalScreen
+      key="goal"
+      initialValue={dailyGoal || undefined}
+      onNext={(v) => { setDailyGoal(v); setStep(4); }}
+      onBack={() => setStep(2)}
+    />,
+    <ConfirmationScreen
+      key="confirmation"
+      userName={userName}
+      objective={objective}
+      level={level}
+      dailyGoal={dailyGoal}
+      onFinish={saveOnboarding}
+      onViewTrail={() => { saveOnboarding().then(() => navigate('/library')); }}
+      onBack={() => setStep(3)}
+      loading={saving}
+    />,
   ];
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-accent/20 flex flex-col">
-      {/* Progress Bar */}
+      {/* Progress bar */}
       <div className="w-full bg-muted h-2">
         <motion.div
           className="h-full bg-gradient-to-r from-primary to-primary-muted"
@@ -72,37 +114,34 @@ const Onboarding = () => {
         />
       </div>
 
-      {/* Skip Button */}
-      <button
-        onClick={handleSkip}
-        className="absolute top-6 right-6 text-sm text-muted-foreground hover:text-foreground transition-colors"
-      >
-        Pular onboarding
-      </button>
+      {/* Step indicator */}
+      <div className="text-center pt-4 text-sm text-muted-foreground">
+        {step + 1} de {TOTAL_STEPS}
+      </div>
 
       {/* Content */}
       <div className="flex-1 flex items-center justify-center p-4">
         <AnimatePresence mode="wait">
           <motion.div
-            key={currentStep}
+            key={step}
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: -20 }}
-            transition={{ duration: 0.3 }}
+            transition={{ duration: 0.25 }}
             className="w-full max-w-2xl"
           >
-            {screens[currentStep]}
+            {screens[step]}
           </motion.div>
         </AnimatePresence>
       </div>
 
-      {/* Progress Dots */}
+      {/* Progress dots */}
       <div className="flex items-center justify-center gap-2 pb-8">
-        {Array.from({ length: totalSteps }).map((_, i) => (
+        {Array.from({ length: TOTAL_STEPS }).map((_, i) => (
           <div
             key={i}
-            className={`w-2.5 h-2.5 rounded-full transition-all ${
-              i === currentStep ? 'bg-primary w-8' : i < currentStep ? 'bg-primary/60' : 'bg-muted-foreground/30'
+            className={`h-2.5 rounded-full transition-all ${
+              i === step ? 'bg-primary w-8' : i < step ? 'bg-primary/60 w-2.5' : 'bg-muted-foreground/30 w-2.5'
             }`}
           />
         ))}

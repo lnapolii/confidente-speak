@@ -28,6 +28,20 @@ const AuthGuard = ({ children, requireEmailVerification = true }: AuthGuardProps
         return;
       }
 
+      // Check onboarding status (skip if already on /onboarding)
+      if (location.pathname !== '/onboarding') {
+        const { data } = await supabase
+          .from('users')
+          .select('onboarding_completed')
+          .eq('id', session.user.id)
+          .single();
+
+        if (data && !data.onboarding_completed) {
+          navigate('/onboarding', { replace: true });
+          return;
+        }
+      }
+
       setAuthorized(true);
       setLoading(false);
     };
