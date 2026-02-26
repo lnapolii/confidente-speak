@@ -186,6 +186,7 @@ export type Database = {
           created_at: string | null
           current_period_end: string | null
           current_period_start: string | null
+          daily_goal_minutes: number | null
           email: string
           email_verified: boolean | null
           english_level: string | null
@@ -197,6 +198,7 @@ export type Database = {
           last_payment_amount: number | null
           last_payment_date: string | null
           last_payment_failed_at: string | null
+          objective: string | null
           onboarding_completed: boolean | null
           phone: string | null
           plan_type: string | null
@@ -212,6 +214,7 @@ export type Database = {
           created_at?: string | null
           current_period_end?: string | null
           current_period_start?: string | null
+          daily_goal_minutes?: number | null
           email: string
           email_verified?: boolean | null
           english_level?: string | null
@@ -223,6 +226,7 @@ export type Database = {
           last_payment_amount?: number | null
           last_payment_date?: string | null
           last_payment_failed_at?: string | null
+          objective?: string | null
           onboarding_completed?: boolean | null
           phone?: string | null
           plan_type?: string | null
@@ -238,6 +242,7 @@ export type Database = {
           created_at?: string | null
           current_period_end?: string | null
           current_period_start?: string | null
+          daily_goal_minutes?: number | null
           email?: string
           email_verified?: boolean | null
           english_level?: string | null
@@ -249,6 +254,7 @@ export type Database = {
           last_payment_amount?: number | null
           last_payment_date?: string | null
           last_payment_failed_at?: string | null
+          objective?: string | null
           onboarding_completed?: boolean | null
           phone?: string | null
           plan_type?: string | null
