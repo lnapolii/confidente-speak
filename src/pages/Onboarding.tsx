@@ -97,6 +97,7 @@ const Onboarding = () => {
       dailyGoal={dailyGoal}
       onFinish={saveOnboarding}
       onViewTrail={() => { saveOnboarding().then(() => navigate('/library')); }}
+      onDiagnostic={() => { saveOnboarding().then(() => navigate('/diagnostico')); }}
       onBack={() => setStep(3)}
       loading={saving}
     />,

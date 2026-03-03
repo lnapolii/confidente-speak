@@ -9,6 +9,7 @@ interface ConfirmationScreenProps {
   dailyGoal: number;
   onFinish: () => void;
   onViewTrail: () => void;
+  onDiagnostic?: () => void;
   onBack: () => void;
   loading?: boolean;
 }
@@ -35,6 +36,7 @@ const ConfirmationScreen = ({
   dailyGoal,
   onFinish,
   onViewTrail,
+  onDiagnostic,
   onBack,
   loading,
 }: ConfirmationScreenProps) => {
@@ -86,6 +88,16 @@ const ConfirmationScreen = ({
       </div>
 
       <div className="space-y-3">
+        {level === 'intermediate' && onDiagnostic && (
+          <Button
+            variant="outline"
+            size="lg"
+            className="w-full text-lg py-6 border-primary text-primary hover:bg-accent"
+            onClick={onDiagnostic}
+          >
+            🧠 Fazer diagnóstico de nível (3 min)
+          </Button>
+        )}
         <Button onClick={onFinish} size="lg" className="w-full text-lg py-6" disabled={loading}>
           {loading ? 'Salvando...' : 'Iniciar minha primeira sessão'}
         </Button>
