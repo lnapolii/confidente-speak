@@ -1,22 +1,16 @@
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { ProgressChart } from "@/components/ProgressChart";
+import StreakWidget from "@/components/StreakWidget";
+import { useStreak } from "@/hooks/useStreak";
+import { supabase } from "@/integrations/supabase/client";
 import { 
-  Flame, 
-  Trophy, 
-  Zap, 
-  Target, 
-  Calendar, 
-  TrendingUp, 
-  Play, 
-  Clock,
-  Star,
-  Award,
-  Bookmark
+  Flame, Trophy, Zap, Target, Calendar, TrendingUp, Play, Clock,
+  Star, Award, Bookmark
 } from "lucide-react";
 
-// Mock data for progress chart
 const mockProgressData = [
   { date: '15/01', score: 78, exercises: 2 },
   { date: '16/01', score: 82, exercises: 3 },
@@ -27,6 +21,19 @@ const mockProgressData = [
 ];
 
 const Dashboard = () => {
+  const streak = useStreak();
+  const [userName, setUserName] = useState('');
+
+  useEffect(() => {
+    const load = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+      const { data } = await supabase.from('users').select('full_name').eq('id', user.id).single();
+      setUserName(data?.full_name?.split(' ')[0] || 'Usuário');
+    };
+    load();
+  }, []);
+
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
@@ -59,33 +66,30 @@ const Dashboard = () => {
       </header>
 
       <main className="container mx-auto px-4 py-8 max-w-6xl">
-        {/* Welcome Section */}
-        <div className="mb-8">
+        {/* Welcome */}
+        <div className="mb-6">
           <h2 className="text-2xl font-heading font-bold text-foreground mb-2">
-            Bom dia, Marina! 👋
+            Bom dia, {userName}! 👋
           </h2>
           <p className="text-muted-foreground">
-            Você está no nível <span className="text-success font-medium">Intermediário</span>. 
-            Continue praticando para alcançar o nível Avançado.
+            Continue praticando para alcançar o próximo nível.
           </p>
         </div>
 
-        {/* Stats Cards */}
-        <div className="grid md:grid-cols-4 gap-6 mb-8">
-          <Card className="card-elevated">
-            <CardContent className="p-6">
-              <div className="flex items-center gap-3">
-                <div className="w-12 h-12 rounded-xl bg-gradient-success flex items-center justify-center">
-                  <Flame className="w-6 h-6 text-success-foreground" />
-                </div>
-                <div>
-                  <p className="text-2xl font-bold text-foreground">12</p>
-                  <p className="text-sm text-muted-foreground">Dias de Streak</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+        {/* Streak Widget */}
+        <div className="mb-8">
+          <StreakWidget
+            currentStreak={streak.currentStreak}
+            longestStreak={streak.longestStreak}
+            todayMinutes={streak.todayMinutes}
+            dailyGoalMinutes={streak.dailyGoalMinutes}
+            goalCompleted={streak.goalCompleted}
+            loading={streak.loading}
+          />
+        </div>
 
+        {/* Stats Cards */}
+        <div className="grid md:grid-cols-3 gap-6 mb-8">
           <Card className="card-elevated">
             <CardContent className="p-6">
               <div className="flex items-center gap-3">
@@ -132,7 +136,6 @@ const Dashboard = () => {
         <div className="grid lg:grid-cols-3 gap-8">
           {/* Main Practice Area */}
           <div className="lg:col-span-2 space-y-6">
-            {/* Quick Practice */}
             <Card className="card-elevated">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
@@ -157,20 +160,11 @@ const Dashboard = () => {
                     </a>
                   </Button>
                 </div>
-                <div className="p-4 bg-accent rounded-lg">
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-sm font-medium">Meta Diária</span>
-                    <span className="text-sm text-muted-foreground">1/2 exercícios</span>
-                  </div>
-                  <Progress value={50} className="h-2" />
-                </div>
               </CardContent>
             </Card>
 
-            {/* Progress Chart */}
             <ProgressChart data={mockProgressData} title="Seu Progresso Semanal" />
 
-            {/* Recent Progress */}
             <Card className="card-elevated">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
@@ -189,9 +183,7 @@ const Dashboard = () => {
                       <div className="flex-1">
                         <p className="font-medium text-foreground mb-1">{item.title}</p>
                         <div className="flex items-center gap-2">
-                          <span className="text-xs px-2 py-1 bg-primary/10 text-primary rounded-full">
-                            {item.category}
-                          </span>
+                          <span className="text-xs px-2 py-1 bg-primary/10 text-primary rounded-full">{item.category}</span>
                           <span className="text-sm text-muted-foreground">{item.time}</span>
                         </div>
                       </div>
@@ -208,7 +200,6 @@ const Dashboard = () => {
 
           {/* Sidebar */}
           <div className="space-y-6">
-            {/* Level Progress */}
             <Card className="card-elevated">
               <CardHeader>
                 <CardTitle className="text-lg">Nível Intermediário</CardTitle>
@@ -229,7 +220,6 @@ const Dashboard = () => {
               </CardContent>
             </Card>
 
-            {/* Recent Achievements */}
             <Card className="card-elevated">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
@@ -257,7 +247,6 @@ const Dashboard = () => {
               </CardContent>
             </Card>
 
-            {/* Today's Goal */}
             <Card className="card-elevated">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
@@ -271,7 +260,9 @@ const Dashboard = () => {
                     <Target className="w-8 h-8 text-success-foreground" />
                   </div>
                   <p className="text-sm text-muted-foreground mb-3">
-                    Complete mais 1 exercício para manter seu streak!
+                    {streak.goalCompleted
+                      ? 'Parabéns! Meta do dia concluída! 🎉'
+                      : 'Complete um exercício para manter seu streak!'}
                   </p>
                   <Button className="btn-success w-full" asChild>
                     <a href="/exercise">Começar Exercício</a>
