@@ -1,0 +1,1 @@
+ALTER TABLE public.users ADD COLUMN IF NOT EXISTS diagnostic_score integer, ADD COLUMN IF NOT EXISTS diagnostic_level text;

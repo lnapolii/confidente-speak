@@ -187,6 +187,8 @@ export type Database = {
           current_period_end: string | null
           current_period_start: string | null
           daily_goal_minutes: number | null
+          diagnostic_level: string | null
+          diagnostic_score: number | null
           email: string
           email_verified: boolean | null
           english_level: string | null
@@ -215,6 +217,8 @@ export type Database = {
           current_period_end?: string | null
           current_period_start?: string | null
           daily_goal_minutes?: number | null
+          diagnostic_level?: string | null
+          diagnostic_score?: number | null
           email: string
           email_verified?: boolean | null
           english_level?: string | null
@@ -243,6 +247,8 @@ export type Database = {
           current_period_end?: string | null
           current_period_start?: string | null
           daily_goal_minutes?: number | null
+          diagnostic_level?: string | null
+          diagnostic_score?: number | null
           email?: string
           email_verified?: boolean | null
           english_level?: string | null

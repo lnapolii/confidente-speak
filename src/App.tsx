@@ -30,6 +30,7 @@ const Login = lazy(() => import("./pages/Login"));
 const ForgotPassword = lazy(() => import("./pages/ForgotPassword"));
 const ResetPassword = lazy(() => import("./pages/ResetPassword"));
 const Subscription = lazy(() => import("./pages/Subscription"));
+const Diagnostic = lazy(() => import("./pages/Diagnostic"));
 
 const queryClient = new QueryClient();
 
@@ -81,6 +82,7 @@ const App = () => {
               <Route path="/terms" element={<TermsOfService />} />
               <Route path="/cookies" element={<CookiePolicy />} />
               <Route path="/faq" element={<FAQ />} />
+              <Route path="/diagnostico" element={<Diagnostic />} />
 
               {/* Protected routes (require auth + email verification) */}
               <Route path="/onboarding" element={<AuthGuard><Onboarding /></AuthGuard>} />
