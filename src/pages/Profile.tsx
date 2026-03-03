@@ -3,23 +3,10 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Input } from "@/components/ui/input";
+import DailyGoalSettings from "@/components/DailyGoalSettings";
 import { 
-  ArrowLeft, 
-  User, 
-  BookOpen, 
-  Trophy, 
-  Settings, 
-  Search, 
-  Star, 
-  Volume2,
-  Download,
-  Flame,
-  Target,
-  Clock,
-  Award,
-  TrendingUp,
-  Heart,
-  RotateCcw
+  ArrowLeft, User, BookOpen, Trophy, Settings, Search, Star, Volume2,
+  Download, Flame, Target, Clock, Award, TrendingUp, Heart, RotateCcw
 } from "lucide-react";
 
 interface ConsultedWord {
@@ -585,27 +572,31 @@ const Profile = () => {
         )}
 
         {activeTab === 'settings' && (
-          <Card className="card-elevated">
-            <CardContent className="p-6">
-              <h2 className="text-2xl font-heading font-bold mb-6">⚙️ Configurações</h2>
-              <div className="space-y-6">
-                <div>
-                  <h3 className="font-semibold mb-2">Informações Pessoais</h3>
-                  <div className="grid md:grid-cols-2 gap-4">
-                    <div>
-                      <label className="text-sm font-medium">Nome</label>
-                      <Input defaultValue={mockUserData.name} />
-                    </div>
-                    <div>
-                      <label className="text-sm font-medium">Email</label>
-                      <Input defaultValue={mockUserData.email} />
+          <div className="space-y-8">
+            <DailyGoalSettings />
+            
+            <Card className="card-elevated">
+              <CardContent className="p-6">
+                <h2 className="text-2xl font-heading font-bold mb-6">⚙️ Configurações</h2>
+                <div className="space-y-6">
+                  <div>
+                    <h3 className="font-semibold mb-2">Informações Pessoais</h3>
+                    <div className="grid md:grid-cols-2 gap-4">
+                      <div>
+                        <label className="text-sm font-medium">Nome</label>
+                        <Input defaultValue={mockUserData.name} />
+                      </div>
+                      <div>
+                        <label className="text-sm font-medium">Email</label>
+                        <Input defaultValue={mockUserData.email} />
+                      </div>
                     </div>
                   </div>
+                  <Button className="btn-primary">Salvar Alterações</Button>
                 </div>
-                <Button className="btn-primary">Salvar Alterações</Button>
-              </div>
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
+          </div>
         )}
       </main>
     </div>

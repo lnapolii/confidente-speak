@@ -1,0 +1,1 @@
+ALTER TABLE public.users ADD COLUMN IF NOT EXISTS reminder_enabled boolean DEFAULT false, ADD COLUMN IF NOT EXISTS reminder_time text DEFAULT '19:00';
