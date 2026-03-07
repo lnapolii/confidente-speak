@@ -1,44 +1,32 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Check, Zap, Crown, Star } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import {
+  Check, X, Zap, Crown, Users, Shield, ChevronDown, ChevronUp,
+} from "lucide-react";
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { createCheckoutSession } from "@/services/stripeService";
 import { supabase } from "@/integrations/supabase/client";
 
 const PricingSection = () => {
+  const [isAnnual, setIsAnnual] = useState(true);
   const [loadingPlan, setLoadingPlan] = useState<string | null>(null);
+  const [openFaq, setOpenFaq] = useState<number | null>(null);
   const { toast } = useToast();
 
-  const handleSubscribe = async (planType: 'monthly' | 'quarterly' | 'yearly') => {
+  const handleSubscribe = async (planType: "monthly" | "yearly") => {
     setLoadingPlan(planType);
-
     try {
-      // Verificar se o usuário está autenticado
       const { data: { session } } = await supabase.auth.getSession();
-      
       if (!session) {
-        toast({
-          title: "Login necessário",
-          description: "Você precisa fazer login para assinar um plano",
-          variant: "destructive",
-        });
-        // Redirecionar para login
+        toast({ title: "Login necessário", description: "Faça login para assinar.", variant: "destructive" });
         window.location.href = "/login";
         return;
       }
-
-      // Criar sessão de checkout (price ID gerenciado no backend via secrets)
       await createCheckoutSession({ planType });
-
-      // O redirecionamento acontece automaticamente dentro de createCheckoutSession
     } catch (error) {
-      console.error('Error subscribing:', error);
-      toast({
-        title: "Erro ao processar",
-        description: error instanceof Error ? error.message : "Tente novamente mais tarde",
-        variant: "destructive",
-      });
+      toast({ title: "Erro", description: error instanceof Error ? error.message : "Tente novamente.", variant: "destructive" });
     } finally {
       setLoadingPlan(null);
     }
@@ -46,189 +34,200 @@ const PricingSection = () => {
 
   const plans = [
     {
-      name: "Mensal",
-      price: "R$ 79,90",
-      period: "por mês",
-      description: "Flexibilidade total",
-      features: [
-        "Acesso completo à plataforma",
-        "Exercícios ilimitados (5, 10 e 15 min)",
-        "Análise de pronúncia por IA",
-        "Biblioteca de vocabulário",
-        "Sistema de gamificação",
-        "Suporte prioritário"
-      ],
-      cta: "Começar 7 Dias Grátis",
+      id: "free",
+      name: "Free",
+      price: "R$ 0",
+      subtitle: "Para experimentar",
+      icon: <Zap className="w-6 h-6" />,
       popular: false,
-      icon: <Star className="w-5 h-5" />,
-      planType: 'monthly' as const,
+      included: [
+        "3 exercícios por dia",
+        "1 trilha de aprendizado (Inglês para Reuniões)",
+        "Diagnóstico de nível",
+        "Feedback básico de pronúncia",
+      ],
+      excluded: [
+        "Roleplay com IA",
+        "Biblioteca completa (+100 exercícios)",
+        "Feedback fonético avançado",
+        "Streak freeze e benefícios premium",
+      ],
+      cta: "Começar grátis",
+      ctaAction: () => { window.location.href = "/signup"; },
     },
     {
-      name: "Trimestral",
-      price: "R$ 59,90",
-      period: "por mês",
-      originalPrice: "R$ 79,90",
-      savings: "Economize 25%",
-      billingInfo: "R$ 179,70 cobrados a cada 3 meses",
-      description: "Mais popular",
-      features: [
-        "Tudo do plano mensal",
-        "25% de desconto",
-        "R$ 60,00 de economia",
-        "Relatórios mensais de progresso",
-        "Metas personalizadas",
-        "Acesso prioritário a novos recursos"
-      ],
-      cta: "Começar 7 Dias Grátis",
+      id: "pro",
+      name: "Pro",
+      price: isAnnual ? "R$ 29" : "R$ 49",
+      period: "/mês",
+      subtitle: "Para profissionais que querem resultado",
+      icon: <Crown className="w-6 h-6" />,
       popular: true,
-      icon: <Crown className="w-5 h-5" />,
-      planType: 'quarterly' as const,
+      included: [
+        "Exercícios ilimitados",
+        "Todas as trilhas de aprendizado",
+        "Feedback fonético avançado com análise de fonemas",
+        "Roleplay com IA em situações corporativas",
+        "Streak freeze (2x por mês)",
+        "Download para prática offline",
+        "Histórico completo de sessões",
+        "Suporte prioritário",
+      ],
+      excluded: [],
+      cta: "Assinar Pro — 7 dias grátis",
+      ctaSubtext: "Cancele quando quiser · Sem multa",
+      ctaAction: () => handleSubscribe(isAnnual ? "yearly" : "monthly"),
     },
     {
-      name: "Anual",
-      price: "R$ 49,90",
-      period: "por mês",
-      originalPrice: "R$ 79,90",
-      savings: "Economize 38%",
-      billingInfo: "R$ 598,80 cobrados anualmente",
-      description: "Melhor custo-benefício",
-      features: [
-        "Tudo do plano mensal",
-        "38% de desconto",
-        "R$ 360,00 de economia",
-        "Badge exclusivo de membro anual",
-        "Acesso a materiais premium",
-        "Certificado de conclusão",
-        "Sessões de mentoria em grupo"
-      ],
-      cta: "Começar 7 Dias Grátis",
+      id: "teams",
+      name: "Teams",
+      price: "R$ 39",
+      period: "/usuário/mês",
+      subtitle: "Para empresas e equipes",
+      icon: <Users className="w-6 h-6" />,
       popular: false,
-      icon: <Crown className="w-5 h-5" />,
-      planType: 'yearly' as const,
-    }
+      included: [
+        "Tudo do plano Pro",
+        "Painel de administração para RH",
+        "Relatórios de progresso da equipe",
+        "Faturamento PJ",
+        "Onboarding dedicado",
+        "Mínimo 5 usuários",
+      ],
+      excluded: [],
+      cta: "Falar com vendas",
+      ctaAction: () => { window.location.href = "mailto:contato@prospeaker.com?subject=Plano Teams"; },
+    },
+  ];
+
+  const faqs = [
+    { q: "Posso cancelar a qualquer momento?", a: "Sim! Você pode cancelar sua assinatura a qualquer momento, sem multa. O acesso continua até o final do período pago." },
+    { q: "Como funciona o reembolso?", a: "Oferecemos garantia de 7 dias. Se não gostar, devolvemos 100% do valor sem perguntas." },
+    { q: "Posso trocar de plano depois?", a: "Claro! Você pode fazer upgrade ou downgrade do seu plano a qualquer momento nas configurações da conta." },
+    { q: "O que acontece depois do trial de 7 dias?", a: "Após o trial, a cobrança é feita automaticamente. Você pode cancelar durante o trial sem ser cobrado." },
   ];
 
   return (
     <section id="pricing" className="py-20 px-4">
       <div className="container mx-auto max-w-6xl">
-        <div className="text-center mb-16">
+        {/* Header */}
+        <div className="text-center mb-12">
           <h2 className="text-3xl md:text-4xl font-heading font-bold text-foreground mb-4">
-            Escolha Seu{" "}
-            <span className="text-gradient-primary">Plano Ideal</span>
+            Escolha seu plano
           </h2>
-          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            Comece grátis e evolua no seu ritmo. Sem permanência, 
-            cancele quando quiser.
-          </p>
+
+          {/* Toggle */}
+          <div className="inline-flex items-center gap-3 bg-muted rounded-full p-1.5">
+            <button
+              onClick={() => setIsAnnual(false)}
+              className={`px-5 py-2 rounded-full text-sm font-medium transition-colors ${!isAnnual ? "bg-background text-foreground shadow-sm" : "text-muted-foreground"}`}
+            >
+              Mensal
+            </button>
+            <button
+              onClick={() => setIsAnnual(true)}
+              className={`px-5 py-2 rounded-full text-sm font-medium transition-colors flex items-center gap-2 ${isAnnual ? "bg-background text-foreground shadow-sm" : "text-muted-foreground"}`}
+            >
+              Anual
+              <Badge className="bg-success text-success-foreground text-[10px] px-2 py-0">Economize 40%</Badge>
+            </button>
+          </div>
         </div>
 
-        <div className="text-center mb-6">
-          <span className="inline-block bg-primary text-primary-foreground px-5 py-2 rounded-full text-sm font-bold animate-pulse">
-            🎁 7 DIAS GRÁTIS em todos os planos
-          </span>
-        </div>
-
-        <div className="grid md:grid-cols-3 gap-8">
-          {plans.map((plan, index) => (
-            <Card 
-              key={index}
-              className={`relative card-elevated hover-lift ${
-                plan.popular ? 'ring-2 ring-primary shadow-primary' : ''
-              }`}
+        {/* Plans Grid */}
+        <div className="grid md:grid-cols-3 gap-6 mb-16">
+          {plans.map((plan) => (
+            <Card
+              key={plan.id}
+              className={`relative card-elevated flex flex-col ${plan.popular ? "ring-2 ring-primary shadow-lg scale-[1.02]" : ""}`}
             >
               {plan.popular && (
-                <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
-                  <div className="bg-gradient-success text-success-foreground px-4 py-2 rounded-full text-sm font-medium flex items-center gap-2">
-                    <Crown className="w-4 h-4" />
-                    Mais Popular
-                  </div>
+                <div className="absolute -top-3.5 left-1/2 -translate-x-1/2">
+                  <Badge className="bg-primary text-primary-foreground px-4 py-1 text-xs font-bold">
+                    <Crown className="w-3 h-3 mr-1" /> Mais popular
+                  </Badge>
                 </div>
               )}
 
-              <CardHeader className="text-center pb-4">
-                <div className={`w-12 h-12 rounded-xl bg-gradient-card flex items-center justify-center mx-auto mb-4 ${
-                  plan.popular ? 'text-primary' : 'text-muted-foreground'
-                }`}>
+              <CardHeader className="text-center pb-2 pt-8">
+                <div className={`w-12 h-12 rounded-xl mx-auto mb-3 flex items-center justify-center ${plan.popular ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground"}`}>
                   {plan.icon}
                 </div>
-                
-                <CardTitle className="text-xl font-heading">
-                  {plan.name}
-                </CardTitle>
-                
-                <div className="mt-4">
-                  <div className="flex items-baseline justify-center gap-2">
-                    <span className="text-3xl font-bold text-foreground">
-                      {plan.price}
-                    </span>
-                    <span className="text-muted-foreground">
-                      {plan.period}
-                    </span>
-                  </div>
-                  
-                  {plan.originalPrice && (
-                    <div className="flex items-center justify-center gap-2 mt-2">
-                      <span className="text-sm text-muted-foreground line-through">
-                        {plan.originalPrice}
-                      </span>
-                      <span className="text-sm text-success font-medium">
-                        {plan.savings}
-                      </span>
-                    </div>
-                  )}
-                  
-                  {plan.billingInfo && (
-                    <p className="text-xs text-muted-foreground mt-2">
-                      {plan.billingInfo}
-                    </p>
-                  )}
+                <CardTitle className="text-lg font-heading">{plan.name}</CardTitle>
+                <div className="mt-3">
+                  <span className="text-3xl font-bold text-foreground">{plan.price}</span>
+                  {plan.period && <span className="text-muted-foreground text-sm">{plan.period}</span>}
                 </div>
-                
-                <p className="text-sm text-muted-foreground mt-2">
-                  {plan.description}
-                </p>
+                <p className="text-sm text-muted-foreground mt-1">{plan.subtitle}</p>
+                {plan.id === "pro" && isAnnual && (
+                  <p className="text-xs text-success font-medium mt-1">R$ 348/ano (equivale a R$ 29/mês)</p>
+                )}
               </CardHeader>
 
-              <CardContent>
-                <ul className="space-y-4 mb-8">
-                  {plan.features.map((feature, featureIndex) => (
-                    <li key={featureIndex} className="flex items-start gap-3">
-                      <Check className="w-5 h-5 text-success mt-0.5 flex-shrink-0" />
-                      <span className="text-sm text-muted-foreground">
-                        {feature}
-                      </span>
+              <CardContent className="flex-1 flex flex-col">
+                <ul className="space-y-3 mb-6 flex-1">
+                  {plan.included.map((f, i) => (
+                    <li key={i} className="flex items-start gap-2.5 text-sm">
+                      <Check className="w-4 h-4 text-success mt-0.5 shrink-0" />
+                      <span className="text-foreground">{f}</span>
+                    </li>
+                  ))}
+                  {plan.excluded.map((f, i) => (
+                    <li key={i} className="flex items-start gap-2.5 text-sm">
+                      <X className="w-4 h-4 text-muted-foreground/40 mt-0.5 shrink-0" />
+                      <span className="text-muted-foreground/60">{f}</span>
                     </li>
                   ))}
                 </ul>
 
-                <Button 
-                  className={`w-full ${
-                    plan.popular 
-                      ? 'btn-hero' 
-                      : index === 0 
-                        ? 'btn-success' 
-                        : ''
-                  }`}
-                  variant={!plan.popular && index !== 0 ? "outline" : "default"}
-                  onClick={() => {
-                    if (plan.planType) {
-                      handleSubscribe(plan.planType);
-                    }
-                  }}
-                  disabled={loadingPlan === plan.planType}
-                >
-                  {loadingPlan === plan.planType ? 'Processando...' : plan.cta}
-                </Button>
+                <div>
+                  <Button
+                    className={`w-full ${plan.popular ? "btn-hero" : ""}`}
+                    variant={plan.popular ? "default" : plan.id === "free" ? "default" : "outline"}
+                    size="lg"
+                    onClick={plan.ctaAction}
+                    disabled={loadingPlan === plan.id}
+                  >
+                    {loadingPlan === plan.id ? "Processando..." : plan.cta}
+                  </Button>
+                  {plan.ctaSubtext && (
+                    <p className="text-xs text-center text-muted-foreground mt-2">{plan.ctaSubtext}</p>
+                  )}
+                </div>
               </CardContent>
             </Card>
           ))}
         </div>
 
-        {/* Money back guarantee */}
-        <div className="text-center mt-12">
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-success-muted text-success-dark text-sm">
-            <Check className="w-4 h-4" />
-            <span>Garantia de 30 dias • Cancele a qualquer momento</span>
+        {/* Guarantee */}
+        <div className="text-center mb-16">
+          <div className="inline-flex items-center gap-3 px-6 py-4 rounded-2xl bg-success/5 border border-success/20">
+            <Shield className="w-8 h-8 text-success" />
+            <div className="text-left">
+              <p className="font-semibold text-foreground">Garantia de 7 dias</p>
+              <p className="text-sm text-muted-foreground">Se não gostar, devolvemos 100% do valor. Sem perguntas.</p>
+            </div>
+          </div>
+        </div>
+
+        {/* FAQ */}
+        <div className="max-w-2xl mx-auto">
+          <h3 className="text-xl font-heading font-bold text-foreground text-center mb-8">Perguntas frequentes</h3>
+          <div className="space-y-3">
+            {faqs.map((faq, i) => (
+              <div key={i} className="border border-border rounded-xl overflow-hidden">
+                <button
+                  onClick={() => setOpenFaq(openFaq === i ? null : i)}
+                  className="w-full flex items-center justify-between p-4 text-left hover:bg-muted/50 transition-colors"
+                >
+                  <span className="font-medium text-foreground text-sm">{faq.q}</span>
+                  {openFaq === i ? <ChevronUp className="w-4 h-4 text-muted-foreground" /> : <ChevronDown className="w-4 h-4 text-muted-foreground" />}
+                </button>
+                {openFaq === i && (
+                  <div className="px-4 pb-4 text-sm text-muted-foreground animate-fade-in">{faq.a}</div>
+                )}
+              </div>
+            ))}
           </div>
         </div>
       </div>
