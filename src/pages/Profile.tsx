@@ -573,6 +573,10 @@ const Profile = () => {
           </Card>
         )}
 
+        {activeTab === 'subscription' && (
+          <SubscriptionSection />
+        )}
+
         {activeTab === 'settings' && (
           <div className="space-y-8">
             <DailyGoalSettings />
