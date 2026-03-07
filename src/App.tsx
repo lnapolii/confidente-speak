@@ -82,6 +82,7 @@ const App = () => {
               <Route path="/terms" element={<TermsOfService />} />
               <Route path="/cookies" element={<CookiePolicy />} />
               <Route path="/faq" element={<FAQ />} />
+              <Route path="/planos" element={<Index />} />
               <Route path="/diagnostico" element={<Diagnostic />} />
 
               {/* Protected routes (require auth + email verification) */}

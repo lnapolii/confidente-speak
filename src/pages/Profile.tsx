@@ -4,9 +4,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Input } from "@/components/ui/input";
 import DailyGoalSettings from "@/components/DailyGoalSettings";
+import SubscriptionSection from "@/components/SubscriptionSection";
 import { 
   ArrowLeft, User, BookOpen, Trophy, Settings, Search, Star, Volume2,
-  Download, Flame, Target, Clock, Award, TrendingUp, Heart, RotateCcw
+  Download, Flame, Target, Clock, Award, TrendingUp, Heart, RotateCcw, CreditCard
 } from "lucide-react";
 
 interface ConsultedWord {
@@ -258,6 +259,7 @@ const Profile = () => {
     { id: 'overview', name: 'Visão Geral', icon: User },
     { id: 'vocabulary', name: 'Meu Vocabulário', icon: BookOpen },
     { id: 'achievements', name: 'Conquistas', icon: Trophy },
+    { id: 'subscription', name: 'Assinatura', icon: CreditCard },
     { id: 'settings', name: 'Configurações', icon: Settings }
   ];
 
@@ -569,6 +571,10 @@ const Profile = () => {
               </div>
             </CardContent>
           </Card>
+        )}
+
+        {activeTab === 'subscription' && (
+          <SubscriptionSection />
         )}
 
         {activeTab === 'settings' && (
