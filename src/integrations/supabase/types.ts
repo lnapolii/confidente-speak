@@ -192,10 +192,14 @@ export type Database = {
           email: string
           email_verified: boolean | null
           english_level: string | null
+          english_uses: Json | null
           full_name: string | null
+          hierarchy_level: string | null
           how_did_you_hear: string | null
           id: string
+          interface_language: string | null
           job_role: string | null
+          job_title: string | null
           last_login_at: string | null
           last_payment_amount: number | null
           last_payment_date: string | null
@@ -204,8 +208,10 @@ export type Database = {
           onboarding_completed: boolean | null
           phone: string | null
           plan_type: string | null
+          preferred_accent: string | null
           reminder_enabled: boolean | null
           reminder_time: string | null
+          sector: string | null
           stripe_customer_id: string | null
           stripe_subscription_id: string | null
           subscription_status: string | null
@@ -224,10 +230,14 @@ export type Database = {
           email: string
           email_verified?: boolean | null
           english_level?: string | null
+          english_uses?: Json | null
           full_name?: string | null
+          hierarchy_level?: string | null
           how_did_you_hear?: string | null
           id?: string
+          interface_language?: string | null
           job_role?: string | null
+          job_title?: string | null
           last_login_at?: string | null
           last_payment_amount?: number | null
           last_payment_date?: string | null
@@ -236,8 +246,10 @@ export type Database = {
           onboarding_completed?: boolean | null
           phone?: string | null
           plan_type?: string | null
+          preferred_accent?: string | null
           reminder_enabled?: boolean | null
           reminder_time?: string | null
+          sector?: string | null
           stripe_customer_id?: string | null
           stripe_subscription_id?: string | null
           subscription_status?: string | null
@@ -256,10 +268,14 @@ export type Database = {
           email?: string
           email_verified?: boolean | null
           english_level?: string | null
+          english_uses?: Json | null
           full_name?: string | null
+          hierarchy_level?: string | null
           how_did_you_hear?: string | null
           id?: string
+          interface_language?: string | null
           job_role?: string | null
+          job_title?: string | null
           last_login_at?: string | null
           last_payment_amount?: number | null
           last_payment_date?: string | null
@@ -268,8 +284,10 @@ export type Database = {
           onboarding_completed?: boolean | null
           phone?: string | null
           plan_type?: string | null
+          preferred_accent?: string | null
           reminder_enabled?: boolean | null
           reminder_time?: string | null
+          sector?: string | null
           stripe_customer_id?: string | null
           stripe_subscription_id?: string | null
           subscription_status?: string | null
