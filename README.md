@@ -23,18 +23,26 @@ The only requirement is having Node.js & npm installed - [install with nvm](http
 Follow these steps:
 
 ```sh
-# Step 1: Clone the repository using the project's Git URL.
+# Step 1: Clone the repository
 git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
 cd <YOUR_PROJECT_NAME>
 
-# Step 3: Install the necessary dependencies.
+# Step 2: Set up environment variables
+cp .env.example .env
+# Then fill in the values in .env:
+# - VITE_SUPABASE_URL: Your Supabase project URL
+# - VITE_SUPABASE_PUBLISHABLE_KEY: Your Supabase anon/public key
+# - VITE_SUPABASE_PROJECT_ID: Your Supabase project ID
+# - VITE_STRIPE_PUBLISHABLE_KEY: Your Stripe publishable key (from https://dashboard.stripe.com/apikeys)
+
+# Step 3: Install dependencies
 npm i
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
+# Step 4: Start the development server
 npm run dev
 ```
+
+> **Note:** The `.env` file is auto-managed when using Lovable Cloud. For local development, copy `.env.example` and fill in your own credentials.
 
 **Edit a file directly in GitHub**
 
