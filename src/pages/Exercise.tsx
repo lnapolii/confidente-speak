@@ -736,12 +736,59 @@ const Exercise = () => {
                 <PronunciationAnalysis
                   userAudio={recordedAudioBlob}
                   referenceText={exerciseText}
-                  onComplete={() => {
+                  onComplete={async (result) => {
                     setShowAnalysis(false);
                     setIsTimerRunning(false);
+                    
+                    // Save to database
+                    try {
+                      const { data: { user } } = await supabase.auth.getUser();
+                      if (user) {
+                        // Save exercise completion
+                        const { error: insertError } = await supabase.from('exercises_completed').insert({
+                          user_id: user.id,
+                          exercise_id: exerciseTopic,
+                          exercise_title: exerciseTopic,
+                          duration: Math.round(finalTimeRef.current / 60),
+                          overall_score: result.overallScore,
+                          clarity_score: result.clarity,
+                          fluency_score: result.fluency,
+                          pronunciation_score: result.pronunciation,
+                          xp_earned: result.xpEarned,
+                          words_consulted: wordsConsulted,
+                          reading_completed: true,
+                          listening_completed: true,
+                          speaking_completed: true,
+                        });
+                        if (insertError) throw insertError;
+
+                        // Update user stats (increment XP and exercise count)
+                        const { data: stats } = await supabase
+                          .from('user_stats')
+                          .select('total_xp, total_exercises, total_words_learned')
+                          .eq('user_id', user.id)
+                          .single();
+
+                        await supabase.from('user_stats').upsert({
+                          user_id: user.id,
+                          total_xp: (stats?.total_xp || 0) + result.xpEarned,
+                          total_exercises: (stats?.total_exercises || 0) + 1,
+                          total_words_learned: (stats?.total_words_learned || 0) + wordsConsulted,
+                          last_practice_date: new Date().toISOString().split('T')[0],
+                        });
+                      }
+                    } catch (err) {
+                      console.error('Failed to save exercise progress:', err);
+                      toast({
+                        title: "Aviso",
+                        description: "Progresso não pôde ser salvo, mas você pode continuar.",
+                        variant: "destructive",
+                      });
+                    }
+
                     toast({
                       title: "Exercício concluído! 🎉",
-                      description: `Parabéns! Tempo total: ${formatTime(finalTimeRef.current)}`,
+                      description: `Parabéns! Tempo total: ${formatTime(finalTimeRef.current)} | +${result.xpEarned} XP`,
                     });
                     setTimeout(() => window.location.href = '/dashboard', 2000);
                   }}
