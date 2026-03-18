@@ -17,3 +17,6 @@ verify_jwt = false
 
 [functions.trial-reminder]
 verify_jwt = false
+
+[functions.analyze-pronunciation]
+verify_jwt = false
