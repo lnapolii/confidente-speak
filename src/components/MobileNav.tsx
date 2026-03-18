@@ -8,7 +8,7 @@ const MobileNav = () => {
 
   const links = [
     { href: "#", label: "Início" },
-    { href: "#solution", label: "Como Funciona" },
+    { href: "#how-it-works", label: "Como Funciona" },
     { href: "#pricing", label: "Preços" },
     { href: "#faq", label: "FAQ" },
   ];
@@ -52,10 +52,10 @@ const MobileNav = () => {
 
           <div className="p-6 border-t border-border space-y-3">
             <Button variant="outline" className="w-full min-h-[44px]" asChild>
-              <a href="/dashboard">Login</a>
+              <a href="/login">Login</a>
             </Button>
             <Button className="w-full min-h-[44px] btn-hero" asChild>
-              <a href="/dashboard">
+              <a href="/signup">
                 <Zap className="w-4 h-4 mr-2" />
                 Começar 7 Dias Grátis
               </a>

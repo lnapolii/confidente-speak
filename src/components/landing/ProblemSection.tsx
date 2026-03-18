@@ -21,7 +21,7 @@ const ProblemSection = () => {
   ];
 
   return (
-    <section className="py-16 px-4 bg-gradient-to-br from-gray-50 to-gray-100">
+    <section className="py-16 px-4 bg-background-muted">
       <div className="container mx-auto max-w-6xl">
         <div className="text-center mb-12">
           <h2 className="text-3xl md:text-4xl font-heading font-bold text-foreground mb-4">
@@ -33,7 +33,7 @@ const ProblemSection = () => {
           {problems.map((problem, index) => (
             <Card 
               key={index} 
-              className="card-elevated hover-lift text-center border-2 border-border/50 bg-white"
+              className="card-elevated hover-lift text-center border-2 border-border/50"
             >
               <CardContent className="p-8">
                 <div className="text-6xl mb-6">

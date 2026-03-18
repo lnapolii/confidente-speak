@@ -24,7 +24,7 @@ const SolutionSection = () => {
   ];
 
   return (
-    <section className="py-20 px-4 bg-gradient-to-br from-blue-50 to-blue-100">
+    <section id="solution" className="py-20 px-4 bg-primary/5">
       <div className="container mx-auto max-w-6xl">
         <div className="text-center mb-16">
           <h2 className="text-3xl md:text-5xl font-heading font-bold text-foreground mb-4">
@@ -40,7 +40,7 @@ const SolutionSection = () => {
           {benefits.map((benefit, index) => (
             <Card 
               key={index}
-              className="card-elevated hover-lift border-2 border-primary bg-white transform transition-all duration-300 hover:scale-105"
+              className="card-elevated hover-lift border-2 border-primary transform transition-all duration-300 hover:scale-105"
             >
               <CardContent className="p-8 text-center">
                 <div className="text-6xl mb-6">
@@ -62,7 +62,7 @@ const SolutionSection = () => {
 
         {/* Social Proof */}
         <div className="text-center">
-          <div className="inline-flex flex-col items-center gap-4 px-8 py-6 rounded-2xl bg-white border-2 border-primary/20 shadow-lg">
+          <div className="inline-flex flex-col items-center gap-4 px-8 py-6 rounded-2xl bg-card border-2 border-primary/20 shadow-lg">
             <p className="text-2xl font-bold text-foreground">
               500+ profissionais
             </p>
