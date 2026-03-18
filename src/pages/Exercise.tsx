@@ -246,6 +246,11 @@ const Exercise = () => {
   const [elapsedTime, setElapsedTime] = useState(0);
   const [isTimerRunning, setIsTimerRunning] = useState(true);
 
+  // Pre-generated waveform bar heights (deterministic, no Math.random in render)
+  const waveformHeights = useRef(
+    Array.from({ length: 40 }, (_, i) => 20 + ((i * 37 + 13) % 41))
+  );
+
   useEffect(() => {
     if (!isTimerRunning) return;
     
@@ -267,7 +272,35 @@ const Exercise = () => {
     return (currentStep / totalSteps) * 100;
   };
 
-  // TTS functionality
+  // TTS functionality with word-level tracking
+  const [audioProgress, setAudioProgress] = useState(0); // 0-100
+  const [audioStartTime, setAudioStartTime] = useState<number | null>(null);
+  const [audioElapsed, setAudioElapsed] = useState(0);
+  const [audioTotalEstimate, setAudioTotalEstimate] = useState(0);
+  const totalWordsCount = exerciseText.split(' ').length;
+
+  // Precompute word char offsets for boundary matching
+  const wordOffsets = useRef<number[]>([]);
+  useEffect(() => {
+    const words = exerciseText.split(' ');
+    const offsets: number[] = [];
+    let pos = 0;
+    for (const w of words) {
+      offsets.push(pos);
+      pos += w.length + 1;
+    }
+    wordOffsets.current = offsets;
+  }, [exerciseText]);
+
+  // Track elapsed audio time
+  useEffect(() => {
+    if (!isPlaying || !audioStartTime) return;
+    const interval = setInterval(() => {
+      setAudioElapsed(Math.floor((Date.now() - audioStartTime) / 1000));
+    }, 250);
+    return () => clearInterval(interval);
+  }, [isPlaying, audioStartTime]);
+
   const generateSpeech = async (text: string) => {
     return new Promise<void>((resolve) => {
       const utterance = new SpeechSynthesisUtterance(text);
@@ -280,10 +313,38 @@ const Exercise = () => {
       utterance.rate = playbackSpeed;
       utterance.pitch = 1.0;
       utterance.lang = 'en-US';
-      
-      utterance.onstart = () => setIsPlaying(true);
+
+      utterance.onstart = () => {
+        setIsPlaying(true);
+        setAudioStartTime(Date.now());
+        setCurrentWordIndex(0);
+        // Estimate total duration: ~150 WPM base, adjusted for speed
+        const wordsCount = text.split(' ').length;
+        setAudioTotalEstimate(Math.ceil((wordsCount / (150 * playbackSpeed)) * 60));
+      };
+
+      utterance.onboundary = (event) => {
+        if (event.name === 'word') {
+          const charIdx = event.charIndex;
+          // Find which word index this charIndex belongs to
+          const offsets = wordOffsets.current;
+          let idx = 0;
+          for (let i = 0; i < offsets.length; i++) {
+            if (offsets[i] <= charIdx) {
+              idx = i;
+            } else {
+              break;
+            }
+          }
+          setCurrentWordIndex(idx);
+          setAudioProgress(Math.round(((idx + 1) / totalWordsCount) * 100));
+        }
+      };
+
       utterance.onend = () => {
         setIsPlaying(false);
+        setCurrentWordIndex(-1);
+        setAudioProgress(100);
         resolve();
       };
       
@@ -295,22 +356,14 @@ const Exercise = () => {
   const startRecording = async () => {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ 
-        audio: {
-          echoCancellation: true,
-          noiseSuppression: true,
-          sampleRate: 44100
-        } 
+        audio: { echoCancellation: true, noiseSuppression: true, sampleRate: 44100 } 
       });
       
       chunksRef.current = [];
-      mediaRecorderRef.current = new MediaRecorder(stream, {
-        mimeType: 'audio/webm;codecs=opus'
-      });
+      mediaRecorderRef.current = new MediaRecorder(stream, { mimeType: 'audio/webm;codecs=opus' });
       
       mediaRecorderRef.current.ondataavailable = (event) => {
-        if (event.data.size > 0) {
-          chunksRef.current.push(event.data);
-        }
+        if (event.data.size > 0) chunksRef.current.push(event.data);
       };
       
       mediaRecorderRef.current.onstop = () => {
@@ -318,25 +371,15 @@ const Exercise = () => {
         const url = URL.createObjectURL(blob);
         setRecordedAudioUrl(url);
         setRecordedAudioBlob(blob);
-        
         stream.getTracks().forEach(track => track.stop());
-        
-        toast({
-          title: "Gravação concluída!",
-          description: "Sua pronúncia foi gravada com sucesso.",
-        });
+        toast({ title: "Gravação concluída!", description: "Sua pronúncia foi gravada com sucesso." });
       };
       
       mediaRecorderRef.current.start();
       setIsRecording(true);
-      
     } catch (error) {
       console.error('Erro ao acessar microfone:', error);
-      toast({
-        title: "Erro no microfone",
-        description: "Por favor, permita o acesso ao microfone para continuar.",
-        variant: "destructive"
-      });
+      toast({ title: "Erro no microfone", description: "Por favor, permita o acesso ao microfone.", variant: "destructive" });
     }
   };
 
@@ -346,27 +389,6 @@ const Exercise = () => {
       setIsRecording(false);
     }
   };
-
-  // Text highlighting during audio
-  useEffect(() => {
-    if (!isPlaying) return;
-    
-    const words = exerciseText.split(' ');
-    let wordIndex = 0;
-    
-    const avgWordDuration = (60 / (150 * playbackSpeed)) * 1000; // ~150 WPM adjusted for speed
-    const interval = setInterval(() => {
-      setCurrentWordIndex(wordIndex);
-      wordIndex++;
-      
-      if (wordIndex >= words.length) {
-        clearInterval(interval);
-        setCurrentWordIndex(0);
-      }
-    }, avgWordDuration);
-    
-    return () => clearInterval(interval);
-  }, [isPlaying]);
 
   const handleWordClick = (word: string) => {
     setWordsConsulted(prev => prev + 1);
@@ -492,12 +514,24 @@ const Exercise = () => {
                       >
                         {isPlaying ? <Pause className="w-6 h-6" /> : <Play className="w-6 h-6" />}
                       </Button>
-                      <div className="text-sm text-muted-foreground">
-                        <span className="font-medium">1:32</span> / 2:45
+                      <div className="text-sm text-muted-foreground font-mono">
+                        <span className="font-medium">{formatTime(audioElapsed)}</span>
+                        {audioTotalEstimate > 0 && ` / ${formatTime(audioTotalEstimate)}`}
                       </div>
                     </div>
                     <div className="flex items-center gap-2">
-                      <Button variant="ghost" size="sm">
+                      <Button 
+                        variant="ghost" 
+                        size="sm"
+                        onClick={() => {
+                          speechSynthesis.cancel();
+                          setIsPlaying(false);
+                          setCurrentWordIndex(-1);
+                          setAudioProgress(0);
+                          setAudioElapsed(0);
+                          setTimeout(() => generateSpeech(exerciseText), 100);
+                        }}
+                      >
                         <RotateCcw className="w-4 h-4 mr-2" />
                         Repetir
                       </Button>
@@ -527,18 +561,24 @@ const Exercise = () => {
                     </div>
                   </div>
 
+                  {/* Progress bar */}
+                  <Progress value={audioProgress} className="h-1.5 mb-4" />
+
+                  {/* Animated waveform */}
                   <div className="waveform mb-4">
-                    {/* Simulated waveform */}
                     <div className="flex items-end justify-center h-full gap-1 px-4">
-                      {Array.from({ length: 40 }).map((_, i) => (
+                      {waveformHeights.current.map((h, i) => (
                         <div
                           key={i}
-                          className={`bg-primary rounded-full transition-all duration-300 ${
-                            i < 15 ? 'opacity-100' : 'opacity-30'
+                          className={`bg-primary rounded-full transition-opacity duration-200 ${
+                            isPlaying ? 'opacity-100' : 'opacity-30'
                           }`}
                           style={{
                             width: '3px',
-                            height: `${Math.random() * 40 + 20}%`,
+                            height: `${h}%`,
+                            animation: isPlaying 
+                              ? `waveform-pulse 0.8s ease-in-out ${i * 0.04}s infinite alternate` 
+                              : 'none',
                           }}
                         />
                       ))}
