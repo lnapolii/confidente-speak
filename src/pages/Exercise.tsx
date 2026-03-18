@@ -347,6 +347,44 @@ const Exercise = () => {
     });
   };
 
+  // Audio recording functionality
+  const startRecording = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ 
+        audio: { echoCancellation: true, noiseSuppression: true, sampleRate: 44100 } 
+      });
+      
+      chunksRef.current = [];
+      mediaRecorderRef.current = new MediaRecorder(stream, { mimeType: 'audio/webm;codecs=opus' });
+      
+      mediaRecorderRef.current.ondataavailable = (event) => {
+        if (event.data.size > 0) chunksRef.current.push(event.data);
+      };
+      
+      mediaRecorderRef.current.onstop = () => {
+        const blob = new Blob(chunksRef.current, { type: 'audio/webm' });
+        const url = URL.createObjectURL(blob);
+        setRecordedAudioUrl(url);
+        setRecordedAudioBlob(blob);
+        stream.getTracks().forEach(track => track.stop());
+        toast({ title: "Gravação concluída!", description: "Sua pronúncia foi gravada com sucesso." });
+      };
+      
+      mediaRecorderRef.current.start();
+      setIsRecording(true);
+    } catch (error) {
+      console.error('Erro ao acessar microfone:', error);
+      toast({ title: "Erro no microfone", description: "Por favor, permita o acesso ao microfone.", variant: "destructive" });
+    }
+  };
+
+  const stopRecording = () => {
+    if (mediaRecorderRef.current && isRecording) {
+      mediaRecorderRef.current.stop();
+      setIsRecording(false);
+    }
+  };
+
   const handleWordClick = (word: string) => {
     setWordsConsulted(prev => prev + 1);
   };
