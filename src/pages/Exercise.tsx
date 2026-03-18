@@ -509,12 +509,24 @@ const Exercise = () => {
                       >
                         {isPlaying ? <Pause className="w-6 h-6" /> : <Play className="w-6 h-6" />}
                       </Button>
-                      <div className="text-sm text-muted-foreground">
-                        <span className="font-medium">1:32</span> / 2:45
+                      <div className="text-sm text-muted-foreground font-mono">
+                        <span className="font-medium">{formatTime(audioElapsed)}</span>
+                        {audioTotalEstimate > 0 && ` / ${formatTime(audioTotalEstimate)}`}
                       </div>
                     </div>
                     <div className="flex items-center gap-2">
-                      <Button variant="ghost" size="sm">
+                      <Button 
+                        variant="ghost" 
+                        size="sm"
+                        onClick={() => {
+                          speechSynthesis.cancel();
+                          setIsPlaying(false);
+                          setCurrentWordIndex(-1);
+                          setAudioProgress(0);
+                          setAudioElapsed(0);
+                          setTimeout(() => generateSpeech(exerciseText), 100);
+                        }}
+                      >
                         <RotateCcw className="w-4 h-4 mr-2" />
                         Repetir
                       </Button>
@@ -544,18 +556,24 @@ const Exercise = () => {
                     </div>
                   </div>
 
+                  {/* Progress bar */}
+                  <Progress value={audioProgress} className="h-1.5 mb-4" />
+
+                  {/* Animated waveform */}
                   <div className="waveform mb-4">
-                    {/* Simulated waveform */}
                     <div className="flex items-end justify-center h-full gap-1 px-4">
-                      {Array.from({ length: 40 }).map((_, i) => (
+                      {waveformHeights.current.map((h, i) => (
                         <div
                           key={i}
-                          className={`bg-primary rounded-full transition-all duration-300 ${
-                            i < 15 ? 'opacity-100' : 'opacity-30'
+                          className={`bg-primary rounded-full transition-opacity duration-200 ${
+                            isPlaying ? 'opacity-100' : 'opacity-30'
                           }`}
                           style={{
                             width: '3px',
-                            height: `${Math.random() * 40 + 20}%`,
+                            height: `${h}%`,
+                            animation: isPlaying 
+                              ? `waveform-pulse 0.8s ease-in-out ${i * 0.04}s infinite alternate` 
+                              : 'none',
                           }}
                         />
                       ))}
