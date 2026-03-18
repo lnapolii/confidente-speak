@@ -30,7 +30,9 @@ export type ExerciseCategory =
   | 'networking'
   | 'daily-life'
   | 'travel'
-  | 'social';
+  | 'social'
+  | 'interviews'
+  | 'conflict-resolution';
 
 export interface CategoryInfo {
   name: string;
@@ -78,5 +80,15 @@ export const CATEGORIES: Record<ExerciseCategory, CategoryInfo> = {
     name: 'Social',
     icon: '🎉',
     description: 'Eventos sociais e casual',
+  },
+  interviews: {
+    name: 'Entrevistas',
+    icon: '🎯',
+    description: 'Entrevistas de emprego e processos seletivos',
+  },
+  'conflict-resolution': {
+    name: 'Resolução de Conflitos',
+    icon: '⚖️',
+    description: 'Feedback difícil e gestão de conflitos',
   },
 };
