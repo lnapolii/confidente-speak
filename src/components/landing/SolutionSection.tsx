@@ -40,7 +40,7 @@ const SolutionSection = () => {
           {benefits.map((benefit, index) => (
             <Card 
               key={index}
-              className="card-elevated hover-lift border-2 border-primary bg-white transform transition-all duration-300 hover:scale-105"
+              className="card-elevated hover-lift border-2 border-primary transform transition-all duration-300 hover:scale-105"
             >
               <CardContent className="p-8 text-center">
                 <div className="text-6xl mb-6">
