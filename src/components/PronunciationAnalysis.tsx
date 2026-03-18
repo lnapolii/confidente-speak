@@ -248,7 +248,7 @@ const PronunciationAnalysis = ({ userAudio, referenceText, onComplete, onRetry }
           Refazer Exercício
         </Button>
         <Button
-          onClick={onComplete}
+          onClick={() => analysis && onComplete(analysis)}
           className="flex-1 btn-success"
         >
           <CheckCircle className="w-4 h-4 mr-2" />
