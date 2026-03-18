@@ -8,8 +8,9 @@ import { useStreak } from "@/hooks/useStreak";
 import { supabase } from "@/integrations/supabase/client";
 import { 
   Flame, Trophy, Zap, Target, Calendar, TrendingUp, Play, Clock,
-  Star, Award, Bookmark
+  Star, Award, Bookmark, CreditCard
 } from "lucide-react";
+import SubscriptionBanner from "@/components/SubscriptionBanner";
 
 const mockProgressData = [
   { date: '15/01', score: 78, exercises: 2 },
