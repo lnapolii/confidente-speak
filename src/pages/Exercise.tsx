@@ -236,6 +236,7 @@ const Exercise = () => {
   const audioRef = useRef<HTMLAudioElement>(null);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<Blob[]>([]);
+  const finalTimeRef = useRef<number>(0);
   const { toast } = useToast();
 
   const exerciseContent = useExerciseContent(exerciseTopic, exerciseDuration);
@@ -672,6 +673,8 @@ const Exercise = () => {
                     disabled={!recordedAudioUrl}
                     onClick={() => {
                       if (recordedAudioBlob) {
+                        finalTimeRef.current = elapsedTime;
+                        setIsTimerRunning(false);
                         setShowAnalysis(true);
                       }
                     }}
@@ -695,9 +698,10 @@ const Exercise = () => {
                   referenceText={exerciseText}
                   onComplete={() => {
                     setShowAnalysis(false);
+                    setIsTimerRunning(false);
                     toast({
                       title: "Exercício concluído! 🎉",
-                      description: "Parabéns! Você ganhou XP.",
+                      description: `Parabéns! Tempo total: ${formatTime(finalTimeRef.current)}`,
                     });
                     setTimeout(() => window.location.href = '/dashboard', 2000);
                   }}
@@ -707,6 +711,8 @@ const Exercise = () => {
                     setRecordedAudioUrl(null);
                     setRecordedAudioBlob(null);
                     setWordsConsulted(0);
+                    setElapsedTime(0);
+                    setIsTimerRunning(true);
                   }}
                 />
               </div>
