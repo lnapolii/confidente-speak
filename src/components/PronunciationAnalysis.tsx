@@ -2,7 +2,9 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
-import { RotateCcw, CheckCircle, Star, TrendingUp, Volume2 } from "lucide-react";
+import { RotateCcw, CheckCircle, Star, TrendingUp, Volume2, AlertCircle } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 interface AnalysisResult {
   overallScore: number;
@@ -31,48 +33,56 @@ interface PronunciationAnalysisProps {
   onRetry: () => void;
 }
 
+const blobToBase64 = (blob: Blob): Promise<string> => {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      const base64 = (reader.result as string).split(",")[1];
+      resolve(base64);
+    };
+    reader.onerror = reject;
+    reader.readAsDataURL(blob);
+  });
+};
+
 const PronunciationAnalysis = ({ userAudio, referenceText, onComplete, onRetry }: PronunciationAnalysisProps) => {
   const [analysis, setAnalysis] = useState<AnalysisResult | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     analyzePronunciation();
   }, []);
 
   const analyzePronunciation = async () => {
-    // Simulate analysis with realistic delay
-    await new Promise(resolve => setTimeout(resolve, 3000));
-    
-    // Mock analysis result - in real implementation, this would call your AI API
-    const mockResult: AnalysisResult = {
-      overallScore: Math.floor(Math.random() * 30) + 70, // 70-100
-      clarity: Math.floor(Math.random() * 25) + 75,
-      fluency: Math.floor(Math.random() * 30) + 70,
-      pronunciation: Math.floor(Math.random() * 25) + 75,
-      xpEarned: Math.floor(Math.random() * 30) + 20, // 20-50 XP
-      suggestions: [
-        {
-          icon: "🗣️",
-          title: "Trabalhe a entonação",
-          description: "Suas frases ficaram um pouco monótonas. Tente variar mais o tom de voz.",
-          example: "Question: Are you READY? (tom ascendente)"
-        },
-        {
-          icon: "⏱️",
-          title: "Diminua a velocidade",
-          description: "Você falou um pouco rápido em algumas partes. Respire entre as frases.",
-        }
-      ],
-      wordAnalysis: [
-        { text: "quarterly", accuracy: 85, phonetic: "ˈkwɔːr.tər.li", needsWork: true },
-        { text: "performance", accuracy: 95, phonetic: "pərˈfɔːr.məns", needsWork: false },
-        { text: "exceeded", accuracy: 78, phonetic: "ɪkˈsiː.dɪd", needsWork: true },
-        { text: "satisfaction", accuracy: 92, phonetic: "ˌsæt.ɪsˈfæk.ʃən", needsWork: false },
-      ]
-    };
+    setIsAnalyzing(true);
+    setError(null);
 
-    setAnalysis(mockResult);
-    setIsAnalyzing(false);
+    try {
+      // Convert audio blob to base64
+      const audioBase64 = await blobToBase64(userAudio);
+
+      const { data, error: fnError } = await supabase.functions.invoke("analyze-pronunciation", {
+        body: { audioBase64, referenceText },
+      });
+
+      if (fnError) {
+        throw new Error(fnError.message || "Erro ao analisar pronúncia");
+      }
+
+      if (data?.error) {
+        throw new Error(data.error);
+      }
+
+      setAnalysis(data as AnalysisResult);
+    } catch (err) {
+      console.error("Pronunciation analysis failed:", err);
+      const message = err instanceof Error ? err.message : "Erro desconhecido";
+      setError(message);
+      toast.error("Erro na análise de pronúncia", { description: message });
+    } finally {
+      setIsAnalyzing(false);
+    }
   };
 
   if (isAnalyzing) {
@@ -86,6 +96,23 @@ const PronunciationAnalysis = ({ userAudio, referenceText, onComplete, onRetry }
         </div>
         <p className="text-lg font-semibold text-foreground mt-4">Analisando sua pronúncia...</p>
         <p className="text-sm text-muted-foreground mt-2">Nossa IA está processando seu áudio</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex flex-col items-center justify-center py-12 space-y-4">
+        <AlertCircle className="w-12 h-12 text-destructive" />
+        <p className="text-lg font-semibold text-foreground">Não foi possível analisar sua pronúncia</p>
+        <p className="text-sm text-muted-foreground text-center max-w-md">{error}</p>
+        <div className="flex gap-3">
+          <Button variant="outline" onClick={onRetry}>
+            <RotateCcw className="w-4 h-4 mr-2" />
+            Gravar novamente
+          </Button>
+          <Button onClick={analyzePronunciation}>Tentar novamente</Button>
+        </div>
       </div>
     );
   }
