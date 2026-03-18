@@ -246,7 +246,11 @@ const Exercise = () => {
   const [elapsedTime, setElapsedTime] = useState(0);
   const [isTimerRunning, setIsTimerRunning] = useState(true);
 
-  useEffect(() => {
+  // Pre-generated waveform bar heights (deterministic, no Math.random in render)
+  const waveformHeights = useRef(
+    Array.from({ length: 40 }, (_, i) => 20 + ((i * 37 + 13) % 41))
+  );
+
     if (!isTimerRunning) return;
     
     const interval = setInterval(() => {
