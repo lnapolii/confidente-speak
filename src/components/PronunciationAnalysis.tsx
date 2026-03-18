@@ -100,6 +100,23 @@ const PronunciationAnalysis = ({ userAudio, referenceText, onComplete, onRetry }
     );
   }
 
+  if (error) {
+    return (
+      <div className="flex flex-col items-center justify-center py-12 space-y-4">
+        <AlertCircle className="w-12 h-12 text-destructive" />
+        <p className="text-lg font-semibold text-foreground">Não foi possível analisar sua pronúncia</p>
+        <p className="text-sm text-muted-foreground text-center max-w-md">{error}</p>
+        <div className="flex gap-3">
+          <Button variant="outline" onClick={onRetry}>
+            <RotateCcw className="w-4 h-4 mr-2" />
+            Gravar novamente
+          </Button>
+          <Button onClick={analyzePronunciation}>Tentar novamente</Button>
+        </div>
+      </div>
+    );
+  }
+
   if (!analysis) return null;
 
   return (
