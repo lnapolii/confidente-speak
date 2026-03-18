@@ -62,7 +62,7 @@ const SolutionSection = () => {
 
         {/* Social Proof */}
         <div className="text-center">
-          <div className="inline-flex flex-col items-center gap-4 px-8 py-6 rounded-2xl bg-white border-2 border-primary/20 shadow-lg">
+          <div className="inline-flex flex-col items-center gap-4 px-8 py-6 rounded-2xl bg-card border-2 border-primary/20 shadow-lg">
             <p className="text-2xl font-bold text-foreground">
               500+ profissionais
             </p>

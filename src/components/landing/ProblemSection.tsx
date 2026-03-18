@@ -33,7 +33,7 @@ const ProblemSection = () => {
           {problems.map((problem, index) => (
             <Card 
               key={index} 
-              className="card-elevated hover-lift text-center border-2 border-border/50 bg-white"
+              className="card-elevated hover-lift text-center border-2 border-border/50"
             >
               <CardContent className="p-8">
                 <div className="text-6xl mb-6">
