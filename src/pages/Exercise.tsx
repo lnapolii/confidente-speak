@@ -267,7 +267,35 @@ const Exercise = () => {
     return (currentStep / totalSteps) * 100;
   };
 
-  // TTS functionality
+  // TTS functionality with word-level tracking
+  const [audioProgress, setAudioProgress] = useState(0); // 0-100
+  const [audioStartTime, setAudioStartTime] = useState<number | null>(null);
+  const [audioElapsed, setAudioElapsed] = useState(0);
+  const [audioTotalEstimate, setAudioTotalEstimate] = useState(0);
+  const totalWordsCount = exerciseText.split(' ').length;
+
+  // Precompute word char offsets for boundary matching
+  const wordOffsets = useRef<number[]>([]);
+  useEffect(() => {
+    const words = exerciseText.split(' ');
+    const offsets: number[] = [];
+    let pos = 0;
+    for (const w of words) {
+      offsets.push(pos);
+      pos += w.length + 1;
+    }
+    wordOffsets.current = offsets;
+  }, [exerciseText]);
+
+  // Track elapsed audio time
+  useEffect(() => {
+    if (!isPlaying || !audioStartTime) return;
+    const interval = setInterval(() => {
+      setAudioElapsed(Math.floor((Date.now() - audioStartTime) / 1000));
+    }, 250);
+    return () => clearInterval(interval);
+  }, [isPlaying, audioStartTime]);
+
   const generateSpeech = async (text: string) => {
     return new Promise<void>((resolve) => {
       const utterance = new SpeechSynthesisUtterance(text);
@@ -280,93 +308,44 @@ const Exercise = () => {
       utterance.rate = playbackSpeed;
       utterance.pitch = 1.0;
       utterance.lang = 'en-US';
-      
-      utterance.onstart = () => setIsPlaying(true);
+
+      utterance.onstart = () => {
+        setIsPlaying(true);
+        setAudioStartTime(Date.now());
+        setCurrentWordIndex(0);
+        // Estimate total duration: ~150 WPM base, adjusted for speed
+        const wordsCount = text.split(' ').length;
+        setAudioTotalEstimate(Math.ceil((wordsCount / (150 * playbackSpeed)) * 60));
+      };
+
+      utterance.onboundary = (event) => {
+        if (event.name === 'word') {
+          const charIdx = event.charIndex;
+          // Find which word index this charIndex belongs to
+          const offsets = wordOffsets.current;
+          let idx = 0;
+          for (let i = 0; i < offsets.length; i++) {
+            if (offsets[i] <= charIdx) {
+              idx = i;
+            } else {
+              break;
+            }
+          }
+          setCurrentWordIndex(idx);
+          setAudioProgress(Math.round(((idx + 1) / totalWordsCount) * 100));
+        }
+      };
+
       utterance.onend = () => {
         setIsPlaying(false);
+        setCurrentWordIndex(-1);
+        setAudioProgress(100);
         resolve();
       };
       
       speechSynthesis.speak(utterance);
     });
   };
-
-  // Audio recording functionality
-  const startRecording = async () => {
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({ 
-        audio: {
-          echoCancellation: true,
-          noiseSuppression: true,
-          sampleRate: 44100
-        } 
-      });
-      
-      chunksRef.current = [];
-      mediaRecorderRef.current = new MediaRecorder(stream, {
-        mimeType: 'audio/webm;codecs=opus'
-      });
-      
-      mediaRecorderRef.current.ondataavailable = (event) => {
-        if (event.data.size > 0) {
-          chunksRef.current.push(event.data);
-        }
-      };
-      
-      mediaRecorderRef.current.onstop = () => {
-        const blob = new Blob(chunksRef.current, { type: 'audio/webm' });
-        const url = URL.createObjectURL(blob);
-        setRecordedAudioUrl(url);
-        setRecordedAudioBlob(blob);
-        
-        stream.getTracks().forEach(track => track.stop());
-        
-        toast({
-          title: "Gravação concluída!",
-          description: "Sua pronúncia foi gravada com sucesso.",
-        });
-      };
-      
-      mediaRecorderRef.current.start();
-      setIsRecording(true);
-      
-    } catch (error) {
-      console.error('Erro ao acessar microfone:', error);
-      toast({
-        title: "Erro no microfone",
-        description: "Por favor, permita o acesso ao microfone para continuar.",
-        variant: "destructive"
-      });
-    }
-  };
-
-  const stopRecording = () => {
-    if (mediaRecorderRef.current && isRecording) {
-      mediaRecorderRef.current.stop();
-      setIsRecording(false);
-    }
-  };
-
-  // Text highlighting during audio
-  useEffect(() => {
-    if (!isPlaying) return;
-    
-    const words = exerciseText.split(' ');
-    let wordIndex = 0;
-    
-    const avgWordDuration = (60 / (150 * playbackSpeed)) * 1000; // ~150 WPM adjusted for speed
-    const interval = setInterval(() => {
-      setCurrentWordIndex(wordIndex);
-      wordIndex++;
-      
-      if (wordIndex >= words.length) {
-        clearInterval(interval);
-        setCurrentWordIndex(0);
-      }
-    }, avgWordDuration);
-    
-    return () => clearInterval(interval);
-  }, [isPlaying]);
 
   const handleWordClick = (word: string) => {
     setWordsConsulted(prev => prev + 1);
