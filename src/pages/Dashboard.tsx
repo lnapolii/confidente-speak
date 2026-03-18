@@ -60,6 +60,12 @@ const Dashboard = () => {
               </a>
             </Button>
             <Button variant="ghost" size="sm" asChild>
+              <a href="/subscription">
+                <CreditCard className="w-4 h-4 mr-1" />
+                Assinatura
+              </a>
+            </Button>
+            <Button variant="ghost" size="sm" asChild>
               <a href="/profile">Perfil</a>
             </Button>
           </div>
