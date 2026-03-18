@@ -8,8 +8,9 @@ import { useStreak } from "@/hooks/useStreak";
 import { supabase } from "@/integrations/supabase/client";
 import { 
   Flame, Trophy, Zap, Target, Calendar, TrendingUp, Play, Clock,
-  Star, Award, Bookmark
+  Star, Award, Bookmark, CreditCard
 } from "lucide-react";
+import SubscriptionBanner from "@/components/SubscriptionBanner";
 
 const mockProgressData = [
   { date: '15/01', score: 78, exercises: 2 },
@@ -59,6 +60,12 @@ const Dashboard = () => {
               </a>
             </Button>
             <Button variant="ghost" size="sm" asChild>
+              <a href="/subscription">
+                <CreditCard className="w-4 h-4 mr-1" />
+                Assinatura
+              </a>
+            </Button>
+            <Button variant="ghost" size="sm" asChild>
               <a href="/profile">Perfil</a>
             </Button>
           </div>
@@ -66,6 +73,9 @@ const Dashboard = () => {
       </header>
 
       <main className="container mx-auto px-4 py-8 max-w-6xl">
+        {/* Subscription Banner */}
+        <SubscriptionBanner />
+
         {/* Welcome */}
         <div className="mb-6">
           <h2 className="text-2xl font-heading font-bold text-foreground mb-2">
