@@ -30,7 +30,9 @@ export type ExerciseCategory =
   | 'networking'
   | 'daily-life'
   | 'travel'
-  | 'social';
+  | 'social'
+  | 'interviews'
+  | 'conflict-resolution';
 
 export interface CategoryInfo {
   name: string;
