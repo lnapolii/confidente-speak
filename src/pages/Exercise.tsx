@@ -748,7 +748,7 @@ const Exercise = () => {
                         const { error: insertError } = await supabase.from('exercises_completed').insert({
                           user_id: user.id,
                           exercise_id: exerciseTopic,
-                          exercise_title: exerciseContent.title || 'Exercise',
+                          exercise_title: exerciseTopic,
                           duration: Math.round(finalTimeRef.current / 60),
                           overall_score: result.overallScore,
                           clarity_score: result.clarity,
