@@ -236,6 +236,7 @@ const Exercise = () => {
   const audioRef = useRef<HTMLAudioElement>(null);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<Blob[]>([]);
+  const finalTimeRef = useRef<number>(0);
   const { toast } = useToast();
 
   const exerciseContent = useExerciseContent(exerciseTopic, exerciseDuration);
