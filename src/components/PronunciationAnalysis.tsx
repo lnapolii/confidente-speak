@@ -29,7 +29,7 @@ interface AnalysisResult {
 interface PronunciationAnalysisProps {
   userAudio: Blob;
   referenceText: string;
-  onComplete: () => void;
+  onComplete: (result: AnalysisResult) => void;
   onRetry: () => void;
 }
 
