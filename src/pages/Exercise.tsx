@@ -673,6 +673,8 @@ const Exercise = () => {
                     disabled={!recordedAudioUrl}
                     onClick={() => {
                       if (recordedAudioBlob) {
+                        finalTimeRef.current = elapsedTime;
+                        setIsTimerRunning(false);
                         setShowAnalysis(true);
                       }
                     }}
