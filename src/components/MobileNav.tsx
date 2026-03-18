@@ -8,7 +8,7 @@ const MobileNav = () => {
 
   const links = [
     { href: "#", label: "Início" },
-    { href: "#solution", label: "Como Funciona" },
+    { href: "#how-it-works", label: "Como Funciona" },
     { href: "#pricing", label: "Preços" },
     { href: "#faq", label: "FAQ" },
   ];
