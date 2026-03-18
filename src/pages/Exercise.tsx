@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
@@ -6,6 +6,7 @@ import { useToast } from "@/hooks/use-toast";
 import PronunciationAnalysis from "@/components/PronunciationAnalysis";
 import ReadingExercise from "@/components/ReadingExercise";
 import { useExerciseContent } from "@/components/ExerciseContentGenerator";
+import { supabase } from "@/integrations/supabase/client";
 import { 
   Play, 
   Pause, 
@@ -18,41 +19,149 @@ import {
   Target,
   CheckCircle,
   ArrowLeft,
-  Clock
+  Clock,
+  Loader2
 } from "lucide-react";
 
-// Translation system
-const WordTooltip = ({ word, isVisible, position }: { word: string; isVisible: boolean; position: { x: number; y: number } }) => {
-  const translations: Record<string, string[]> = {
-    quarterly: ["trimestral", "a cada três meses"],
-    performance: ["desempenho", "performance"],
-    exceeded: ["excedeu", "superou"],
-    satisfaction: ["satisfação"],
-    challenges: ["desafios", "dificuldades"],
-    adoption: ["adoção", "implementação"],
-    meeting: ["reunião", "encontro"],
-    revenue: ["receita", "faturamento"]
-  };
+// Translation data type
+interface TranslationData {
+  primary: string;
+  alternatives: string[];
+  phonetic: string;
+  example: string;
+  tip: string;
+}
 
-  const wordTranslations = translations[word.toLowerCase().replace(/[.,!?]/g, '')] || ["tradução não encontrada"];
+// Translation cache shared across components
+const translationCache: Record<string, TranslationData> = {};
+
+// Translation system
+const WordTooltip = ({ word, context, isVisible, position }: { 
+  word: string; 
+  context: string;
+  isVisible: boolean; 
+  position: { x: number; y: number };
+}) => {
+  const [translation, setTranslation] = useState<TranslationData | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState(false);
+
+  useEffect(() => {
+    if (!isVisible || !word) {
+      return;
+    }
+
+    const cleanWord = word.toLowerCase().replace(/[.,!?;:'"()]/g, '');
+    if (!cleanWord) return;
+
+    // Check cache first
+    if (translationCache[cleanWord]) {
+      setTranslation(translationCache[cleanWord]);
+      setError(false);
+      return;
+    }
+
+    // Fetch from API
+    const fetchTranslation = async () => {
+      setIsLoading(true);
+      setError(false);
+      try {
+        const { data, error: fnError } = await supabase.functions.invoke("translate", {
+          body: { word: cleanWord, context },
+        });
+
+        if (fnError || data?.error) {
+          throw new Error(fnError?.message || data?.error);
+        }
+
+        const result: TranslationData = {
+          primary: data.primary || cleanWord,
+          alternatives: data.alternatives || [],
+          phonetic: data.phonetic || "",
+          example: data.example || "",
+          tip: data.tip || "",
+        };
+
+        translationCache[cleanWord] = result;
+        setTranslation(result);
+      } catch (err) {
+        console.error("Translation error:", err);
+        setError(true);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchTranslation();
+  }, [word, isVisible, context]);
+
+  const playPronunciation = (text: string) => {
+    const utterance = new SpeechSynthesisUtterance(text);
+    const voices = speechSynthesis.getVoices();
+    const enVoice = voices.find(v => v.lang === 'en-US' && v.name.includes('Google'))
+      || voices.find(v => v.lang === 'en-US') || voices[0];
+    utterance.voice = enVoice;
+    utterance.rate = 0.8;
+    utterance.lang = 'en-US';
+    speechSynthesis.speak(utterance);
+  };
 
   if (!isVisible) return null;
 
   return (
     <div 
-      className="fixed z-50 bg-gray-900 text-white px-3 py-2 rounded-lg shadow-lg text-sm pointer-events-none"
+      className="fixed z-50 bg-popover text-popover-foreground border border-border px-4 py-3 rounded-xl shadow-xl text-sm pointer-events-auto min-w-[220px] max-w-[320px]"
       style={{ 
-        left: position.x + 10, 
-        top: position.y - 40,
-        transform: position.y < 50 ? 'translateY(40px)' : 'none'
+        left: Math.min(position.x + 10, window.innerWidth - 340), 
+        top: position.y - 10,
+        transform: 'translateY(-100%)'
       }}
     >
-      <div className="font-semibold mb-1">Traduções:</div>
-      <ul className="list-disc list-inside">
-        {wordTranslations.map((translation, i) => (
-          <li key={i}>{translation}</li>
-        ))}
-      </ul>
+      {isLoading && (
+        <div className="flex items-center gap-2 py-2">
+          <Loader2 className="w-4 h-4 animate-spin text-primary" />
+          <span className="text-muted-foreground">Traduzindo...</span>
+        </div>
+      )}
+
+      {error && !isLoading && (
+        <p className="text-destructive text-xs">Tradução indisponível</p>
+      )}
+
+      {translation && !isLoading && (
+        <div className="space-y-2">
+          <div className="flex items-center justify-between gap-2">
+            <span className="font-bold text-foreground">{translation.primary}</span>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-6 w-6 p-0"
+              onClick={(e) => {
+                e.stopPropagation();
+                playPronunciation(word);
+              }}
+            >
+              <Volume2 className="w-3.5 h-3.5 text-primary" />
+            </Button>
+          </div>
+
+          {translation.phonetic && (
+            <p className="text-xs text-muted-foreground italic">/{translation.phonetic}/</p>
+          )}
+
+          {translation.alternatives.length > 0 && (
+            <p className="text-xs text-muted-foreground">
+              Também: {translation.alternatives.join(", ")}
+            </p>
+          )}
+
+          {translation.example && (
+            <p className="text-xs text-muted-foreground border-t border-border pt-1 mt-1">
+              <span className="font-medium">Ex:</span> {translation.example}
+            </p>
+          )}
+        </div>
+      )}
     </div>
   );
 };
@@ -87,8 +196,8 @@ const InteractiveText = ({ text, onWordClick }: { text: string; onWordClick: (wo
           return (
             <span 
               key={index}
-              className={`cursor-pointer hover:bg-blue-100 transition-colors px-1 rounded ${
-                isClicked ? 'text-blue-600 bg-blue-50' : ''
+              className={`cursor-pointer hover:bg-primary/10 transition-colors px-1 rounded ${
+                isClicked ? 'text-primary bg-primary/5' : ''
               }`}
               onMouseEnter={(e) => handleWordHover(word, e)}
               onMouseLeave={() => setTooltip(null)}
@@ -102,6 +211,7 @@ const InteractiveText = ({ text, onWordClick }: { text: string; onWordClick: (wo
       
       <WordTooltip 
         word={tooltip?.word || ''} 
+        context={text}
         isVisible={!!tooltip} 
         position={tooltip?.position || { x: 0, y: 0 }} 
       />
