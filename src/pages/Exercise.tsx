@@ -251,6 +251,7 @@ const Exercise = () => {
     Array.from({ length: 40 }, (_, i) => 20 + ((i * 37 + 13) % 41))
   );
 
+  useEffect(() => {
     if (!isTimerRunning) return;
     
     const interval = setInterval(() => {
