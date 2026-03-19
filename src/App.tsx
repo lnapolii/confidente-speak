@@ -85,6 +85,7 @@ const App = () => {
               <Route path="/faq" element={<FAQ />} />
               <Route path="/planos" element={<Index />} />
               <Route path="/diagnostico" element={<Diagnostic />} />
+              <Route path="/roleplay" element={<AuthGuard><Roleplay /></AuthGuard>} />
 
               {/* Protected routes (require auth + email verification) */}
               <Route path="/onboarding" element={<AuthGuard><Onboarding /></AuthGuard>} />
