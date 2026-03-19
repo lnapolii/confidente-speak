@@ -31,6 +31,7 @@ const ForgotPassword = lazy(() => import("./pages/ForgotPassword"));
 const ResetPassword = lazy(() => import("./pages/ResetPassword"));
 const Subscription = lazy(() => import("./pages/Subscription"));
 const Diagnostic = lazy(() => import("./pages/Diagnostic"));
+const Roleplay = lazy(() => import("./pages/Roleplay"));
 
 const queryClient = new QueryClient();
 
