@@ -31,6 +31,7 @@ const ForgotPassword = lazy(() => import("./pages/ForgotPassword"));
 const ResetPassword = lazy(() => import("./pages/ResetPassword"));
 const Subscription = lazy(() => import("./pages/Subscription"));
 const Diagnostic = lazy(() => import("./pages/Diagnostic"));
+const Roleplay = lazy(() => import("./pages/Roleplay"));
 
 const queryClient = new QueryClient();
 
@@ -84,6 +85,7 @@ const App = () => {
               <Route path="/faq" element={<FAQ />} />
               <Route path="/planos" element={<Index />} />
               <Route path="/diagnostico" element={<Diagnostic />} />
+              <Route path="/roleplay" element={<AuthGuard><Roleplay /></AuthGuard>} />
 
               {/* Protected routes (require auth + email verification) */}
               <Route path="/onboarding" element={<AuthGuard><Onboarding /></AuthGuard>} />
